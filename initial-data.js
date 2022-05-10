@@ -18,16 +18,16 @@ module.exports = async keystone => {
 
   if (count === 0) {
     const password = randomString();
-    const email = 'admin@example.com';
+    const username = 'admin';
 
     const { errors } = await keystone.executeGraphQL({
       context: keystone.createContext().sudo(),
-      query: `mutation initialUser($password: String, $email: String) {
-            createUser(data: {name: "Admin", email: $email, isAdmin: true, password: $password}) {
+      query: `mutation initialUser($password: String, $username: String) {
+            createUser(data: {name: "Admin", username: $username,  password: $password}) {
               id
             }
           }`,
-      variables: { password, email },
+      variables: { password, username },
     });
 
     if (errors) {
@@ -37,7 +37,7 @@ module.exports = async keystone => {
       console.log(`
 
       User created:
-        email: ${email}
+        username: ${username}
         password: ${password}
       Please change these details after initial login.
       `);
