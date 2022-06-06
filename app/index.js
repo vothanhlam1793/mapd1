@@ -16,7 +16,12 @@ function middle(keystone, dev, distDir){
   // TOOL
   app.get("/", (req, res)=>{
       res.render("index");
-  })
+  });
+
+  // Trang nhap lieu
+  app.get("/input", (req, res)=>{
+    res.render("input/index");
+  });
   return app;
 }
 

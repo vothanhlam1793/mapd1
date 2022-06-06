@@ -12,6 +12,8 @@ dotenv.config()
 
 // List
 const User = require("./lists/User");
+const Marker = require("./lists/Marker");
+const Project = require("./lists/Project");
 
 const PROJECT_NAME = process.env.PROJECT_NAME;
 
@@ -53,6 +55,8 @@ const keystone = new Keystone({
 });
 
 keystone.createList("User", User);
+keystone.createList("Marker", Marker);
+keystone.createList("Project", Project);
 
 const authStrategy = keystone.createAuthStrategy({
     type: PasswordAuthStrategy,
