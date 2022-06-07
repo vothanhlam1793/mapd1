@@ -1,3 +1,12 @@
 <div class="border border-danger m-3 p-3">
-{{hello}}
+    <div class="border border-primary p-2 rounded">
+        <!-- <create-project></create-project> -->
+    </div>
+    <div class="border border-warning p-2 rounded">
+        <h4>Sửa</h4>
+        <edit-project></edit-project>
+    </div>
+    <div>
+        <item-project v-for="project in projects" :id="project.id"></item-project>
+    </div>
 </div>

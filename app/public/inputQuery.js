@@ -13,6 +13,7 @@ query {
 const QL_FETCH_PROJECT = `
 query {
     allProjects {
+        id
         marker {
             id
             name
@@ -39,4 +40,52 @@ mutation update($x: Int!, $y: Int!, $name: String!, $note: String) {
       id
     }
   }
+`
+
+const QL_CREATE_PROJECT = `
+mutation create($title: String!, $content: String!, $marker: ID!){
+  createProject(data: {
+    title: $title,
+    content: $content,
+    marker: { 
+    	connect: {
+        id: $marker
+      }
+    }
+  }){
+    id
+  }
+}
+`
+
+const QL_UPDATE_PROJECT = `
+mutation create($id: ID!, $title: String!, $content: String!, $marker: ID!){
+  updateProject(id: $id, data: {
+    title: $title,
+    content: $content,
+    marker: { 
+    	connect: {
+        id: $marker
+      }
+    }
+  }){
+    id
+  }
+}
+`
+
+const QL_DELETE_MARKER = `
+mutation ($id: ID!) {
+  deleteMarker(id: $id) {
+    id
+  }
+}
+`
+
+const QL_DELETE_PROJECT = `
+mutation ($id: ID!) {
+  deleteProject(id: $id) {
+    id
+  }
+}
 `
