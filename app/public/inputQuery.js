@@ -1,3 +1,32 @@
+const QL_F_MARKER = `
+query ($id: ID!){
+  Marker(where: {id: $id}){
+    id
+    x
+    y
+    name
+    note
+  }
+}
+`
+
+const QL_F_PROJECT = `
+query ($id: ID!){
+    Project (where: {id: $id}){
+        id
+        marker {
+            id
+            name
+            x
+            y
+        }
+        title
+        content
+    }
+}
+`
+
+
 const QL_FETCH_MARKER = `
 query {
     allMarkers {
