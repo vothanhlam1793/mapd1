@@ -1,25 +1,5 @@
 var width = window.innerWidth;
 var height = window.innerHeight;
-class IconMarker {
-    constructor(){
-        this.image = new Image();
-        this.image.onload = function(){
-
-        };
-        this.image.src = "/marker.png";
-    }
-}
-
-function getImage(){
-    
-}
-
-class MarkerView {
-    constructor(){
-        this.image = getImage();
-    }
-}
-
 
 class View {
     constructor(ctn){
@@ -31,7 +11,9 @@ class View {
         this.layer1 = new Konva.Layer();
         this.background = new Konva.Image();
         this.imgBackground = new Image();
-        this.markers = [];  // Quan ly view
+        this.imgMarker = new Image();
+        this.imgMarker.src = "/maker.png"
+        this.markers = [];  // Quan ly markers
         this._initView();
     }
     _initView(){
@@ -44,14 +26,52 @@ class View {
                 y: 0,
                 image: this,
             });           
+
+            // Canh chi vi tri
+            var w = width - that.background.x();
+            var wa = that.background.width();
+            that.background.width(w);
+            that.background.scaleY(w/wa);
+            //
             that.layer1.add(that.background); 
         };
         this.imgBackground.src = "/my_image.png";
     }
-    reloadMarker(){
+    reloadMarker(markers){
+        var that = this;
         // Xoa va ve lai marker
+        this.markers.forEach(function(marker){
+            marker.destroy();
+        });
+        this.markers = [];
 
+        // Ve lai marker
+        markers.forEach(function(marker){
+            var marker = that.getMarker(marker);
+            that.layer1.add(marker);
+            that.markers.push(marker);
+        });
+        
     }
+    getMarker(marker){
+        // Chuyen doi toa do
+        var Sw = this.background.scaleX()*this.background.width()/this.imgBackground.width;
+        var Sy = this.background.scaleY()*this.background.height()/this.imgBackground.height;
+        
+        // Tạo marker
+        var mk = new Konva.Image({
+            x: marker.x*Sw,
+            y: marker.y*Sy,
+            width: 30,
+            height: 30,
+            image: this.imgMarker,
+            draggable: true,
+        });
+
+        // Chức năng - tương tác tại đây
+        
+        return mk;
+    };
 }
 
 class Model {
@@ -88,7 +108,7 @@ class Controller {
     }
     updateData = (data) => {
         // Xoa va ve lai marker
-        this.view.reloadMarker();
+        this.view.reloadMarker(this.model.markers);
     }
 }
 
