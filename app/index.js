@@ -20,8 +20,18 @@ function middle(keystone, dev, distDir){
 
   // Trang nhap lieu
   app.get("/input", (req, res)=>{
-    res.render("input/index");
+    res.render("input/index", {
+      page: 'project'
+    });
   });
+
+  // Trang tao marker
+  app.get("/createMarker", function(req, res){
+    res.render("input/index", {
+      page: 'marker'
+    });
+  });
+
   return app;
 }
 

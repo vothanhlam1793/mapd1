@@ -46,6 +46,7 @@ const store = new Vuex.Store({
                     arr = "createMarker";
                 }
                 graphql(QL, payload).then(data=>{
+                    console.log(data);
                     if(data.data[arr].id){
                         context.dispatch('fetchMarkers');
                         resolve(data.data[arr]);
@@ -121,16 +122,17 @@ const store = new Vuex.Store({
     }
 });
 
+if(!mixin_marker){
+    var mixin_marker = {};
+}
 var app = new Vue({
     el: "#app",
+    mixins: [mixin_marker],
     store,
     data: {
 
     },
     computed: {
-        hello(){
-            return this.$store.state.test;
-        },
         markers(){
             return this.$store.state.markers;
         },
@@ -145,5 +147,8 @@ var app = new Vue({
     created(){
         this.$store.dispatch('fetchMarkers');
         this.$store.dispatch('fetchProjects');
+    },
+    mounted(){
+
     }
 });

@@ -1,27 +1,34 @@
 <html>
     <head>
         <%- include("../head.ejs"); %>
+        <script src="https://unpkg.com/konva@8/konva.min.js"></script>
     </head>
     <body>
         <div class="container-fluid">
             <nav class="navbar navbar-expand-sm bg-light">
-
-                <!-- Links -->
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Thêm địa điểm</a>
+                        <a class="nav-link" href="/createMarker">Địa điểm</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Nhập liệu</a>
+                        <a class="nav-link" href="/input">Dự án</a>
                     </li>
                 </ul>
-              
             </nav>
             <div class="" id="app">
-                <%- include("map.ejs"); %>
+                <% if(page == 'project') { %>
+                    <%- include("content.ejs"); %>
+                <% } else { %>
+                    <%- include("marker.ejs"); %>
+                <% } %>
             </div>
             <script src="/inputQuery.js"></script>
             <script src="/inputComponent.js"></script>
+            <% if(page == 'project') { %>
+               
+            <% } else { %>
+                <script src="/input/marker.js"></script>
+            <% } %>
             <script src="/input.js"></script>
         </div>
     </body>
