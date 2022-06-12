@@ -1,13 +1,40 @@
-<div class="row p-2">
-    <div class="col-3 p-1">
-        <div class="border border-primary p-2">
-            <edit-marker></edit-marker>
-            <create-marker></create-marker>
+<html>
+    <head>
+        <%- include("../head.ejs"); %>
+        <script src="https://unpkg.com/konva@8/konva.min.js"></script>
+    </head>
+    <body>
+        <div class="container-fluid">
+            <nav class="navbar navbar-expand-sm bg-light">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/createMarker">Địa điểm</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/input">Dự án</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="" id="app">
+                <div class="row p-2">
+                    <div class="col-3 p-1">
+                        <div class="border border-primary p-2">
+                            <edit-marker></edit-marker>
+                            <create-marker></create-marker>
+                        </div>
+                    </div>
+                    <div class="col-9 p-1">
+                        <div class="border border-danger p-2">
+                            <div id="canvas"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="col-9 p-1">
-        <div class="border border-danger p-2">
-            <div id="canvas"></div>
-        </div>
-    </div>
-</div>
+        <script src="/inputQuery.js"></script>
+        <script src="/inputComponent.js"></script>
+        <script src="/ViewMap.js"></script>
+        <script src="/input/marker.js"></script>
+        <script src="/input.js"></script>
+    </body>
+</html>

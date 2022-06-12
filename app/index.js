@@ -27,7 +27,7 @@ function middle(keystone, dev, distDir){
 
   // Trang tao marker
   app.get("/createMarker", function(req, res){
-    res.render("input/index", {
+    res.render("input/marker", {
       page: 'marker'
     });
   });
