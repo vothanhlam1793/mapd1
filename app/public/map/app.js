@@ -27,8 +27,12 @@ class Model {
     }
     getProjectsByMarker(markerId){
         var projects = this.projects.filter(function(project){
-            // console.log(project);
-            return project.marker.id == markerId;
+            if(project.marker){
+                return project.marker.id == markerId;                
+            } else {
+                return false;
+            }
+
         });
         return projects;
     }
@@ -48,8 +52,7 @@ class Controller {
     }
 
     onHandleMarker = (e, marker) => {
-        var projects = this.model.getProjectsByMarker(marker.data.id);
-        this.view.showInfo(projects);        
+        this.view.showInfo(marker.data.projects);        
     }
 
     onHandleBackground = () => {

@@ -16,20 +16,11 @@
                 </ul>
             </nav>
             <div class="" id="app">
-                <% if(page == 'project') { %>
-                    <%- include("content.ejs"); %>
-                <% } else { %>
-                    <%- include("marker.ejs"); %>
-                <% } %>
+                <create-project></create-project>
             </div>
             <script src="/inputQuery.js"></script>
             <script src="/inputComponent.js"></script>
-            <% if(page == 'project') { %>
-               
-            <% } else { %>
-                <script src="/input/marker.js"></script>
-            <% } %>
-            <script src="/input.js"></script>
+            <script src="/input/input.js"></script>
         </div>
     </body>
 </html>

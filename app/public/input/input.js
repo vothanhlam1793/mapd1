@@ -1,48 +1,12 @@
 var width = window.innerWidth;
 var height = window.innerHeight;
-var a = 0;
 
-var mixin_marker = {
+var mixin_input = {
     mounted(){
-        var that = this;
-        var a = $("#stage")[0]
-        that.view = new View('canvas', $(a).width(), $(a).height());
-        setTimeout(function(){
-            that.view.reloadMarker(that.markers);
-        }, 1000);
-        that.view.onHandleMarker = that.handleClickMarker;
-        that.view.extendMarker = that.handleExtendMarker;
-    },
-    methods: {
-        onViewReady(){
-            this.view.reloadMarker(this.markers);
-        },
-        handleClickMarker(e, r){
-            this.$store.dispatch('editInputMarker', {
-                id: r.data.id
-            })
-        },
-        handleExtendMarker(mk){
-            var that = this;
-            mk.on('dragend', function(){
-                var xR = that.view.background.image().width * this.x() / (that.view.background.scaleX() * that.view.background.width())
-                var yR = that.view.background.image().height * this.y() / (that.view.background.scaleY() * that.view.background.height())
-                if(confirm("Bạn muốn lưu toạ độ mới cho marker?")){
-                    that.$store.dispatch('createOrUpdateMarker', {
-                        id: this.data.id,
-                        x: parseInt(xR),
-                        y: parseInt(yR),
-                        name: this.data.name,
-                        note: this.data.note
-                    }).then(data=>{
-                        that.$store.dispatch('fetchMarkers').then(data=>{
-                            that.view.reloadMarker(that.markers);
-                        });
-                    });
 
-                }
-            })
-        },
+    },  
+    methods: {
+
     }
 }
 
@@ -70,15 +34,9 @@ const store = new Vuex.Store({
     },
     actions: {
         fetchMarkers(context, payload){
-            return new Promise((resolve, reject)=>{
-                graphql(QL_FETCH_MARKER,{}).then(data=>{
-                    // console.log(data);
-                    context.commit('uploadMarkers', data.data);
-                    resolve(data.data);
-                }).catch(e=>{
-                    reject(e);
-                });
-            })
+            graphql(QL_FETCH_MARKER,{}).then(data=>{
+                context.commit('uploadMarkers', data.data);
+            });
         },
         fetchProjects(context, payload){
             graphql(QL_FETCH_PROJECT,{}).then(data=>{
@@ -102,7 +60,7 @@ const store = new Vuex.Store({
                 graphql(QL, payload).then(data=>{
                     console.log(data);
                     if(data.data[arr].id){
-                        // context.dispatch('fetchMarkers');
+                        context.dispatch('fetchMarkers');
                         resolve(data.data[arr]);
                     } else {
                         reject(data.data);
@@ -176,12 +134,9 @@ const store = new Vuex.Store({
     }
 });
 
-if(!mixin_marker){
-    var mixin_marker = {};
-}
 var app = new Vue({
     el: "#app",
-    mixins: [mixin_marker],
+    mixins: [mixin_input],
     store,
     data: {
 
@@ -206,3 +161,31 @@ var app = new Vue({
 
     }
 });
+
+const ql = `mutation uploadImageQuery ($file: Upload!){
+    updateProject(id: "629f5988f56c6e25eed6ef8c", data: {
+      image: $file,
+    }) {
+      id
+      image {
+        publicUrl
+      }
+    }
+  }`
+var a;
+var b;
+function onChange(e) {
+    var rd = new FileReader();
+    rd.onload = function(){
+        var blob = new Blob([rd.result], {type: "image/png"});
+        const url = URL.createObjectURL(blob, {type: "image/png"});
+        a = url;
+        b = blob;
+        graphql(ql, {
+            file: b
+        }).then(data=>{
+            console.log(data);
+        })
+    }
+    rd.readAsArrayBuffer(e.files[0]);
+}

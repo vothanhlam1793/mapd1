@@ -30,12 +30,8 @@ const {
         ref: "Project.marker"
       }
     },
-    // List-level access controls
+    labelField: "name",
     access: {
-    //   read: access.userIsAdminOrOwner,
-    //   update: access.userIsAdminOrOwner,
-    //   create: access.userIsAdmin,
-    //   delete: access.userIsAdmin,
-    //   auth: true,
+
     },
 };

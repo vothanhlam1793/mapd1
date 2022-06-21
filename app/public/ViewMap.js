@@ -75,7 +75,7 @@ class View {
 
             that.infoMarker.adjustIndex();
             that.infoMarker.show();
-            that.infoMarker.zIndex(1);
+            that.infoMarker.moveToTop();
         }
 
         that.infoMarker.adjustIndex = function(){
@@ -129,6 +129,7 @@ class View {
                 shadowOffsetY: 10,
                 shadowOpacity: 0.2,
                 cornerRadius: 10,
+                name: 'formForm'
             });
 
             // Tieu de
@@ -154,6 +155,13 @@ class View {
                 align: 'center',
             });
 
+            var contentImage = new Konva.Image({
+                x: 25
+            })
+
+            // Tao mot doi tuong tai day
+            that.getContentImage(contentImage, project.content, formForm);
+
             var linkForm = new Konva.Text({
                 x: 25,
                 text: "Xem dự án",
@@ -167,9 +175,12 @@ class View {
             linkForm.on("click", function(){
                 window.open("https://creta.vn", "_blank");
             });
-
+            var urlImage = "/image/test.jpg"; //default
+            if(project.image){
+                urlImage = project.image.publicUrl;
+            }
             // Anh
-            Konva.Image.fromURL("/image/test.jpg", function(imageNode){
+            Konva.Image.fromURL(urlImage, function(imageNode){
                 var wMax = formForm.width() - 50;
                 var w = imageNode.image().width;
                 imageNode.setAttrs({
@@ -179,12 +190,15 @@ class View {
                     scaleY: wMax / w
                 });
                 
-                contentForm.y(imageNode.y() + imageNode.height()*imageNode.scaleY() + 20);
-                linkForm.y(contentForm.y() + contentForm.height() + 20);
+                // contentForm.y(imageNode.y() + imageNode.height()*imageNode.scaleY() + 20);
+                contentImage.y(imageNode.y() + imageNode.height()*imageNode.scaleY() + 20);
+                // linkForm.y(contentForm.y() + contentForm.height() + 20);
+                linkForm.y(contentForm.y() + contentImage.height() + 20);
                 that.infoForm.add(formForm);
                 that.infoForm.add(titleForm);
                 that.infoForm.add(imageNode);
-                that.infoForm.add(contentForm);
+                // that.infoForm.add(contentForm);
+                that.infoForm.add(contentImage);
                 that.infoForm.add(linkForm);
 
                 // Hien ra
@@ -272,6 +286,7 @@ class View {
             if(projects){
                 that.projects = projects;
             }
+
             titleList.text("Dự án " + that.projects[0].marker.name);
 
             var lists  = that.listProject.find('.list');
@@ -350,6 +365,7 @@ class View {
                     x: 1/newScale,
                     y: 1/newScale
                 })
+                marker.center(1/newScale);
             })
             // Kich thuoc info marker
             that.infoMarker.scale({
@@ -401,6 +417,7 @@ class View {
                 that.stage.position(newPos);
                 that.layer2.x(-newPos.x);
                 that.layer2.y(-newPos.y);
+                
                 oldMouse = mousePos;
             }
         })
@@ -414,6 +431,36 @@ class View {
         that.stage.add(that.layer1); // Background
         that.stage.add(that.layer2); // Info project
 
+        // Scale layer1
+        that.layer1.scaleWidthBackground = function(){
+            // Neu la pc
+            var w = that.stage.width();
+            var h = that.stage.height();
+            if(w > h){
+                var s = (1/(3/4-1/4))*h/that.imgBackground.height;
+                
+                that.background.scaleX(s);
+                that.background.scaleY(s);
+    
+                var wi = that.background.width()*that.background.scaleX();
+                var hi = that.background.height()*that.background.scaleY();
+                
+                that.layer1.x(-(1/16)*wi);
+                that.layer1.y(-(1/4-1/16)*hi);
+            } else {
+                var s = (1/(7/8-1/2))*w/that.imgBackground.width;
+                
+                that.background.scaleX(s);
+                that.background.scaleY(s);
+    
+                var wi = that.background.width()*that.background.scaleX();
+                var hi = that.background.height()*that.background.scaleY();
+                
+                that.layer1.x(-(1/2 - 1/16)*wi);
+                that.layer1.y(-(1/4-1/8)*hi);   
+            }
+        }
+
         // Hide
         // that.layer2.hide();
 
@@ -424,11 +471,8 @@ class View {
                 image: this,
             });           
 
+            that.layer1.scaleWidthBackground();
             // Canh chi vi tri
-            var w = that.stage.width();
-            var wa = that.background.width();
-            that.background.width(w);
-            that.background.scaleY(w/wa);
 
             // Them layer1 vao background
             that.layer1.add(that.background);
@@ -446,6 +490,9 @@ class View {
 
         // Ve lai marker
         markers.forEach(function(marker){
+            if(marker.projects.length == 0){
+                return;
+            }
             var marker = that.getMarker(marker);
             that.layer1.add(marker);
             that.markers.push(marker);
@@ -469,7 +516,18 @@ class View {
             draggable: true,
         });
         mk.data = marker;
+        mk.Sw = Sw;
+        mk.Sy = Sy;
 
+        mk.center = function(s){
+            mk.x(mk.data.x*mk.Sw - mk.width()/2*s);
+            mk.y(mk.data.y*mk.Sy - mk.height()/2*s);
+        }
+        mk.scale({
+            x: 1/that.layer1.scaleX(),
+            y: 1/that.layer1.scaleX()
+        })
+        mk.center(1/that.layer1.scaleX());        
         // Chức năng - tương tác tại đây
         mk.on('click', function(e){
             that.onHandleMarker(e, this);
@@ -488,5 +546,23 @@ class View {
     showInfo(projects){
         this.projects = projects;
         this.listProject.createList(projects);
+    }
+    getContentImage(image, content, formForm){
+        var that = this;
+        var b = $("<div style='width: 400px; height: 320px'></div>");
+        b.html(content);
+        console.log(b);
+        document.body.appendChild(b[0]);
+        html2canvas(b[0], {
+            backgroundColor: 'rgba(0,0,0,0)',
+        }).then((canvas) => {
+            var wMax = formForm.width() - 50;
+            var w = canvas.width;
+            // show it inside Konva.Image
+            image.image(canvas);
+            image.width(wMax);
+            image.scaleY(wMax/w);
+            
+        });
     }
 }

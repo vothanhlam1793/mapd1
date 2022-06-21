@@ -35,6 +35,20 @@ query {
       name
       note
       id
+      projects {
+        id
+        title
+        content
+        image {
+          publicUrl
+        }
+        marker {
+          id
+          name
+          x
+          y
+        }
+      }
     }
 }
 `

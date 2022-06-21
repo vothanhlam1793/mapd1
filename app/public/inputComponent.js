@@ -1,21 +1,11 @@
 Vue.component('create-marker', {
     template: `
-        <div>
-            <div class="row m-1">
-                <div class="col-6">
-                    <label>X</label>
-                    <input class="form-control" placeholder="Nhập X" v-model="x">
-                </div>
-                <div class="col-6">
-                    <label>Y</label>
-                    <input class="form-control" placeholder="Nhập Y" v-model="y">
-                </div>
-            </div>
-            <div class="m-3">
+        <div class="border border-primary rounded p-3">
+            <div class="mb-3">
                 <input class="form-control" placeholder="Tên địa điểm" v-model="name"> 
             </div>
-            <div>
-                <button class="btn btn-success" @click="creteMarker()">Tạo</button>
+            <div class="text-center">
+                <button class="btn btn-success" @click="creteMarker()">Tạo mới</button>
             </div>
         </div>
     `,
@@ -28,13 +18,27 @@ Vue.component('create-marker', {
     },
     methods: {
         creteMarker(){
+            var that = this;
+            var view = this.$parent.view;
+            var x = this.x;
+            var y = this.y;
+            if(view){
+                    var sX = view.layer1.scaleX();
+                    var x = view.stage.x();
+                    var y = view.stage.y();
+                    x = -x;
+                    y = -y;
+            }
+            console.log(x, y, sX, x/sX);
             this.$store.dispatch('createOrUpdateMarker', {
-                x: parseInt(this.x),
-                y: parseInt(this.y),
+                x: parseInt(x/sX),
+                y: parseInt(y/sX),
                 name: this.name
             }).then(data => {
                 // DONE
-                console.log(data);
+                that.$store.dispatch('fetchMarkers').then(data=>{
+                    that.$parent.view.reloadMarker(that.$parent.markers)
+                })
             }).catch(data => {
                 // ERROR
                 console.log("ERROR", data);
@@ -69,6 +73,11 @@ Vue.component('edit-marker', {
     methods: {
         updateMarker(){
             this.$store.dispatch('createOrUpdateMarker', this.inpMarker);
+        },
+        deleteMarker(){
+            if(confirm("Bạn đang xoá marker? - Hành động không thể hoàn tác!.")){
+                this.$store.dispatch('deleteMarker', this.marker);
+            }
         }
     },
     template: `
@@ -92,6 +101,7 @@ Vue.component('edit-marker', {
             </div>
             <div>
                 <button class="btn btn-success" @click="updateMarker()">Lưu</button>
+                <button class="btn btn-danger" @click="deleteMarker()">Xoá</button>
             </div>
         </div>
     `
@@ -155,6 +165,9 @@ Vue.component('create-project', {
             <div class="form-group">
                 <button class="btn btn-primary" @click="createProject()">Tạo</button>
             </div>
+            <div>
+            <input type="file" onchange="onChange(this)">
+            </div>
         </div>
     `,
     data: function(){
@@ -171,12 +184,15 @@ Vue.component('create-project', {
     },
     methods: {
         createProject(){
+            var that = this;
             this.$store.dispatch('createOrUpdateProject', {
                 title: this.title,
                 content: this.content,
                 marker: this.idMarker
             }).then(data => {
-                console.log(data);
+                that.title = "";
+                that.content = "";
+                that.idMarker = "";
             });
         }
     }
