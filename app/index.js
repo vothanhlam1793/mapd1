@@ -32,6 +32,11 @@ function middle(keystone, dev, distDir){
     });
   });
 
+  // Test
+  app.get("/test", function(req, res){
+    res.render("test");
+  })
+
   return app;
 }
 

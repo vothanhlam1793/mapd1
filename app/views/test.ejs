@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <%- include("head.ejs"); %>
+        <script src="/inputQuery.js"></script>
+        <script src="https://unpkg.com/konva@8/konva.min.js"></script>
+        <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+        <script src="/List.js"></script>
+        <link rel="stylesheet" href="/style.css">
+    </head>
+    <body class="">
+        <div id="canvas">
+
+        </div>
+        <script>
+        var stage = new Konva.Stage({
+            container: 'canvas',
+            width: 340,
+            height: 500,
+        });
+        var layer2 = new Konva.Layer({});
+        stage.add(layer2);
+        var l = new List(['An Giang', 'Bạc Liêu', 'Bến Tre', 'Cà Mau', 'Cần Thơ','Đồng Tháp', 'Hậu Giang', 'Kiên Giang', 'Long An', 'Sóc Trăng','Tiền Giang', 'Trà Vinh', 'Vĩnh Long', 'Hồ Chí Minh', 'Đồng Nai','Bình Phước', 'Bình Dương', 'Tây Ninh', 'Bà Rịa Vũng Tàu', 'Kon Tum',]);
+        layer2.add(l.group);
+
+        </script>
+    </body>
+</html>
