@@ -52,7 +52,9 @@ class Controller {
     }
 
     onHandleMarker = (e, marker) => {
-        this.view.showInfo(marker.data.projects);        
+        // this.view.showInfo(marker.data.projects); 
+        this.view.forcusMarker(marker);   
+        // console.log(1);    
     }
 
     onHandleBackground = () => {

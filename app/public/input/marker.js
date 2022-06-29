@@ -8,14 +8,14 @@ var mixin_marker = {
         var a = $("#stage")[0]
         that.view = new View('canvas', $(a).width(), $(a).height());
         setTimeout(function(){
-            that.view.reloadMarker(that.markers);
+            that.view.reloadMarker(that.markers, true);
         }, 1000);
         that.view.onHandleMarker = that.handleClickMarker;
         that.view.extendMarker = that.handleExtendMarker;
     },
     methods: {
         onViewReady(){
-            this.view.reloadMarker(this.markers);
+            this.view.reloadMarker(this.markers, true);
         },
         handleClickMarker(e, r){
             this.$store.dispatch('editInputMarker', {
@@ -36,7 +36,7 @@ var mixin_marker = {
                         note: this.data.note
                     }).then(data=>{
                         that.$store.dispatch('fetchMarkers').then(data=>{
-                            that.view.reloadMarker(that.markers);
+                            that.view.reloadMarker(that.markers, true);
                         });
                     });
 

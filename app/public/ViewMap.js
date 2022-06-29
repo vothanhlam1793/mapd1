@@ -51,24 +51,15 @@ class View {
         var complexText = new Konva.Text({
             text: "Đà Nẵng",
             fontSize: 18,
-            fontFamily: 'Calibri',
-            fill: '#555',
-            padding: 10,
+            // fill: '#555',
+            fontStyle: 'bold',
+            // padding: 10,
             align: 'center',
             name: "nameMarker"
         });
         var rect = new Konva.Rect({
-            stroke: '#555',
-            strokeWidth: 2,
-            fill: '#ddd',
             width: complexText.width(),
             height: complexText.height(),
-            shadowColor: 'black',
-            shadowBlur: 10,
-            shadowOffsetX: 10,
-            shadowOffsetY: 10,
-            shadowOpacity: 0.2,
-            cornerRadius: 10,
             name: "rect"
         });
         that.infoMarker.add(rect);
@@ -96,13 +87,19 @@ class View {
                 return;
             }
             var rects = that.infoMarker.find('.rect');
-            that.infoMarker.x(that.infoMarker.marker.x() - (rects[0].width() + 5)/that.layer1.scaleX());
-            that.infoMarker.y(that.infoMarker.marker.y() - (rects[0].height() + 5)/that.layer1.scaleX());
+            that.infoMarker.x(that.infoMarker.marker.x() - (rects[0].width()/2 - 15)/that.layer1.scaleX());
+            that.infoMarker.y(that.infoMarker.marker.y() - (20)/that.layer1.scaleX());
         }
 
         // Cai dat vao
         that.layer1.add(that.infoMarker);
         that.infoMarker.hide();
+        whenFontIsLoaded(function () {
+            // set font style when font is loaded
+            // so Konva will recalculate text wrapping if it has limited width
+            complexText.fontFamily('Montserrat');
+            console.log(complexText);
+        });
     }
     _initInfo(){
         var that = this;
@@ -243,7 +240,7 @@ class View {
                 align: 'center',
             })
             // Mo du an
-            linkForm.on("click", function(){
+            linkForm.on("click tap", function(){
                 window.open("https://creta.vn", "_blank");
             });
             var urlImage = "/image/test.jpg"; //default
@@ -431,12 +428,116 @@ class View {
         that.listProject.hide();
         that.layer2.add(that.listProject);
     }
+    _setZoom(newScale, posCenter, callback){
+        // Hieu ung luon nha :))
+        var that = this;
+        var oldScale = that.layer1.scaleX();
+        var TILEZOOM = 0.1;
+        var SMOODTIME = 50;
+        var n = Math.abs(newScale - oldScale)/TILEZOOM;
+        var direction;
+        if(newScale > oldScale){
+            direction = 1;
+        } else {
+            direction = -1;
+        }
+        var nScale = oldScale;
+        var i = 0;
+        var d = setInterval(function(){
+            nScale = oldScale + i*direction*TILEZOOM;
+            that.layer1.scale({ x: nScale, y: nScale});
+            that._setCenter(posCenter);
+            that.__notChangeWhenZoom()
+            i = i + 1;
+            if(i > n){
+                clearInterval(d);
+                if(callback){
+                    callback();
+                } 
+            }
+        }, SMOODTIME);
+    }
+    __notChangeWhenZoom(){
+        var that = this;
+        var newScale = that.layer1.scaleX();
+        // Cac thong so khong thay doi khi scale
+        // Kich thuoc marker
+        that.markers.forEach(function(marker){
+            marker.scale({
+                x: 1/newScale,
+                y: 1/newScale
+            })
+            marker.center(1/newScale);
+        })
+        // Kich thuoc info marker
+        that.infoMarker.scale({
+            x: 1/newScale,
+            y: 1/newScale
+        });
+
+        // Khoang cach info marker
+        that.infoMarker.adjustIndex();
+    }
+    _zoom(mousePointTo, direction, oldScale, pointer){
+        var that = this;
+        var newScale = direction > 0 ? oldScale * that.scaleBy : oldScale / that.scaleBy;
+        if(newScale < 1){
+            newScale = 1;
+        }
+        that.layer1.scale({ x: newScale, y: newScale });
+    
+        // Cac thong so khong thay doi khi scale
+        // Kich thuoc marker
+        that.markers.forEach(function(marker){
+            marker.scale({
+                x: 1/newScale,
+                y: 1/newScale
+            })
+            marker.center(1/newScale);
+        })
+        // Kich thuoc info marker
+        that.infoMarker.scale({
+            x: 1/newScale,
+            y: 1/newScale
+        });
+
+        // Khoang cach info marker
+        that.infoMarker.adjustIndex();
+        
+        var newPos = {
+            x: pointer.x - mousePointTo.x * newScale,
+            y: pointer.y - mousePointTo.y * newScale,
+        };
+
+        // Cap nhat vi tri
+        that.layer2.x(-newPos.x);
+        that.layer2.y(-newPos.y);
+
+        that.stage.position(newPos);
+    }
+    _setCenter(pos){
+        var that = this;
+        // pos layer1
+        // Dua theo toa do w, h cua background
+        // console.log(this.background.scale(), this.background.position());
+        var pL = {
+            x: pos.x*this.background.scaleX(),
+            y: pos.y*this.background.scaleY()
+        };
+        var newPos = {
+            x: -1 * pL.x * this.layer1.scaleX() + this.stage.width()/2,
+            y: -1 * pL.y * this.layer1.scaleY() + this.stage.height()/2
+        };
+        that.stage.position(newPos);
+        that.layer2.x(-newPos.x);
+        that.layer2.y(-newPos.y);
+    }
     _initInteractive(){
         var that = this;
-        this.background.on('click', function(){
+        this.background.on('click tap', function(){
         
         });
-        this.layer1.on('click', function(){
+        this.layer1.on('click tap', function(){
             // console.log("laery1");
             switch(that.lockBackground){
                 case 0: {
@@ -449,22 +550,8 @@ class View {
                     that.lockBackground = 0;
                     that.listProject.hide();
                     that.infoForm.hide();
-                }
-            }
-        })
-        this.layer1.on('tap', function(){
-            // console.log("laery1");
-            switch(that.lockBackground){
-                case 0: {
-
-                } break;
-                case 1: {
-                    that.lockBackground = 2;
-                } break;
-                case 2: {
-                    that.lockBackground = 0;
-                    that.listProject.hide();
-                    that.infoForm.hide();
+                    that.normalMarker();
+                    that.oldForcusMarker = undefined;
                 }
             }
         })
@@ -488,41 +575,7 @@ class View {
             } else {
                 return;
             }
-      
-            var newScale = direction > 0 ? oldScale * that.scaleBy : oldScale / that.scaleBy;
-            if(newScale < 1){
-                newScale = 1;
-            }
-            that.layer1.scale({ x: newScale, y: newScale });
-        
-            // Cac thong so khong thay doi khi scale
-            // Kich thuoc marker
-            that.markers.forEach(function(marker){
-                marker.scale({
-                    x: 1/newScale,
-                    y: 1/newScale
-                })
-                marker.center(1/newScale);
-            })
-            // Kich thuoc info marker
-            that.infoMarker.scale({
-                x: 1/newScale,
-                y: 1/newScale
-            });
-
-            // Khoang cach info marker
-            that.infoMarker.adjustIndex();
-            
-            var newPos = {
-                x: pointer.x - mousePointTo.x * newScale,
-                y: pointer.y - mousePointTo.y * newScale,
-            };
-
-            // Cap nhat vi tri
-            that.layer2.x(-newPos.x);
-            that.layer2.y(-newPos.y);
-
-            that.stage.position(newPos);
+            that._zoom(mousePointTo, direction, oldScale, pointer);
         });
 
         that.stage.on('touchmove', function(e){
@@ -589,6 +642,8 @@ class View {
                 // Khoang cach info marker
                 that.infoMarker.adjustIndex();
                 that.stage.position(newPos);
+                that.layer2.x(-newPos.x);
+                that.layer2.y(-newPos.y);
 
             } else {
                 var mousePos = that.stage.getPointerPosition();
@@ -658,7 +713,7 @@ class View {
                 that.layer2.x(-newPos.x);
                 that.layer2.y(-newPos.y);
                 oldMouse = mousePos;
-                console.log(newPos, maxHeight, maxWidth);
+                // console.log(newPos, maxHeight, maxWidth);
             }
         })
         that.stage.on('mouseup', function(){
@@ -685,8 +740,11 @@ class View {
                 var wi = that.background.width()*that.background.scaleX();
                 var hi = that.background.height()*that.background.scaleY();
                 
-                that.layer1.x(-(1/16)*wi);
-                that.layer1.y(-(1/4-1/16)*hi);
+                that.stage.x(-(1/16)*wi);
+                that.stage.y(-(1/4-1/16)*hi);
+
+                that.layer2.x((1/16)*wi);
+                that.layer2.y((1/4-1/16)*hi);
             } else {
                 var s = (1/(7/8-1/2))*w/that.imgBackground.width;
                 
@@ -696,8 +754,11 @@ class View {
                 var wi = that.background.width()*that.background.scaleX();
                 var hi = that.background.height()*that.background.scaleY();
                 
-                that.layer1.x(-(1/2 - 1/16)*wi);
-                that.layer1.y(-(1/4-1/8)*hi);   
+                that.stage.x(-(1/2 - 1/16)*wi);
+                that.stage.y(-(1/4-1/8)*hi);   
+
+                that.layer2.x((1/2 - 1/16)*wi);
+                that.layer2.y((1/4-1/8)*hi);   
             }
         }
 
@@ -720,18 +781,22 @@ class View {
         };
         this.imgBackground.src = "/my_image.png";
     }
-    reloadMarker(markers){
+    reloadMarker(markers, all){
         var that = this;
         // Xoa va ve lai marker
         this.markers.forEach(function(marker){
             marker.destroy();
         });
         this.markers = [];
-
+        
         // Ve lai marker
         markers.forEach(function(marker){
-            if(marker.projects.length == 0){
-                return;
+            if(all){
+
+            } else {
+                if(marker.projects.length == 0){
+                    return;
+                }
             }
             var marker = that.getMarker(marker);
             that.layer1.add(marker);
@@ -769,8 +834,15 @@ class View {
         })
         mk.center(1/that.layer1.scaleX());        
         // Chức năng - tương tác tại đây
-        mk.on('click', function(e){
-            that.onHandleMarker(e, this);
+        mk.on('click tap', function(e){
+            that.showInfo(mk.data.projects);
+            that.markers.forEach(function(mke){
+                if(mke._id == mk._id){
+                    mke.opacity(1);
+                } else {
+                    mke.opacity(0.5);
+                }
+            });
         });
 
         mk.on('mouseover', function(){
@@ -782,9 +854,9 @@ class View {
         });
 
         // TOUCH PAD
-        mk.on('tap', function(e){
-            that.onHandleMarker(e, this);
-        })
+        // mk.on('tap', function(e){
+        //     that.onHandleMarker(e, this);
+        // })
 
         that.extendMarker(mk);
         return mk;
@@ -810,5 +882,61 @@ class View {
             image.scaleY(wMax/w);
             
         });
+    }
+    forcusMarker(marker){
+        var that = this;
+        if(!this.oldForcusMarker){
+            // STAGE 
+            var pS = {
+                x: this.stage.x() + this.stage.width()/2,
+                y: this.stage.y() + this.stage.height()/2
+            }
+            console.log(pS);
+            // LAYER 1
+            var pL = {
+                x: -pS.x/this.layer1.scaleX(),
+                y: -pS.y/this.layer1.scaleY()
+            }
+            console.log(pL);
+            // BACKGROUND
+            var pB = {
+                x: pL.x/this.background.scaleX(),
+                y: pL.y/this.background.scaleY()
+            }
+            this.oldForcusMarker = {        // Toa do da nang
+                data: pB
+            }
+            console.log(pB);
+
+            this.oldForcusMarker = {
+                data: {
+                    x: 4304,
+                    y: 2559
+                }
+            }
+        }
+        that._setZoom(1, {x: this.oldForcusMarker.data.x, y: this.oldForcusMarker.data.y}, function(){      // Toa do da nang
+            // Opacity
+            console.log(marker);
+            that.markers.forEach(function(mk){
+                if(mk._id == marker._id){
+                    mk.opacity(1);
+                } else {
+                    mk.opacity(0.5);
+                }
+            });
+            that.infoMarker.showMarker(marker);
+            that._setZoom(3, {x: marker.data.x, y: marker.data.y}, function(){
+                that.showInfo(marker.data.projects);
+                that.lockBackground = 2;
+            });
+            that.oldForcusMarker = marker;
+        }); 
+
+    }
+    normalMarker(){
+        this.markers.forEach(function(mk){
+            mk.opacity(1);
+        })
     }
 }

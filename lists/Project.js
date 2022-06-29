@@ -27,8 +27,21 @@ const {
       title: {
         type: Text
       },
-      content: {
-        type: Wysiwyg
+      place: {
+        type: Text,
+        label: "Địa điểm"
+      },
+      category: {
+        type: Text,
+        label: "Thể loại công trình"
+      },
+      work: {
+        type: Text,
+        label: "Hạng mục"
+      },
+      year: {
+        type: Text,
+        label: "Năm hoàn thành"
       },
       image: {
         type: File,
@@ -42,6 +55,9 @@ const {
         },  
       },
       url: {
+        type: Text
+      },
+      content: {
         type: Text
       }
     },
