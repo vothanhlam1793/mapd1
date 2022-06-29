@@ -78,13 +78,22 @@ class View {
         this._initMarker();
         
         this.projects = [];
+        this.hello = new Konva.Group();
         this.infoForm = new Konva.Group();
         this.listProject = new Konva.Group();
         this._initInfo();
         this._initView();
         this._initInteractive();
-
         this.onHandleMarker = function(){};
+    }
+    __toggleInfo(t){
+        if(t == "hello"){
+            this.hello.show();
+            this.infoForm.hide();
+        } else if (t == "info") {
+            this.hello.hide();
+            this.infoForm.show();
+        }
     }
     _initMarker(){
         var that = this;
@@ -153,7 +162,7 @@ class View {
         } else {
             that.infoForm = new Konva.Group({
                 x: 50, 
-                y: 100,
+                y: 50,
                 name: "infoForm"
             });
         }
@@ -180,8 +189,8 @@ class View {
                     stroke: '#B14406',
                     strokeWidth: 2,
                     fill: '#FFFFFF',
-                    width: 363,
-                    height: 547,
+                    width: 300,
+                    height: 420,
                     shadowColor: 'black',
                     shadowBlur: 10,
                     shadowOffsetX: 10,
@@ -218,24 +227,12 @@ class View {
                 width: formForm.width() - 30,
                 fontSize: 40,
                 fontFamily: 'Montserrat',
+                fontStyle: "700",
                 align: 'left',
             });
-
-            // Gioi thieu
-            // var contentForm = new Konva.Text({
-            //     x: 25,
-            //     text: project.content,
-            //     fontSize: 18,
-            //     fontFamily: 'Montserrat',
-            //     fill: '#555',
-            //     padding: 10,
-            //     align: 'center',
-            // });
-
-            var contentImage = new Konva.Image({
-                x: 25
-            })
-
+            if(width < height){
+                titleForm.fontSize(28);
+            }
             var backButton = new Konva.Group();
 
             var backText = new Konva.Text({
@@ -263,7 +260,7 @@ class View {
             backButton.add(backText);
             backButton.on('tap', function(e){
                 console.log(e);
-                that.infoForm.hide();
+                that.__toggleInfo("hello");
                 that.listProject.show();
             })
             // Tao mot doi tuong tai day
@@ -290,7 +287,7 @@ class View {
             }
             // Anh
             Konva.Image.fromURL(urlImage, function(imageNode){
-                var wMax = 337;
+                var wMax = formForm.width() - 30;
                 var w = imageNode.image().width;
                 imageNode.setAttrs({
                     x: (formForm.width() - wMax)/2,
@@ -298,11 +295,6 @@ class View {
                     width: wMax,
                     scaleY: wMax / w
                 });
-                
-                // contentForm.y(imageNode.y() + imageNode.height()*imageNode.scaleY() + 20);
-                // contentImage.y(imageNode.y() + imageNode.height()*imageNode.scaleY() + 20);
-                // linkForm.y(contentForm.y() + contentForm.height() + 20);
-                // linkForm.y(contentForm.y() + contentImage.height() + 20);
                 titleForm.position({
                     x: 15,
                     y: imageNode.y() + imageNode.height()*imageNode.scaleY() + 15
@@ -320,7 +312,7 @@ class View {
                         text: key + ": ",
                         fontSize: 12,
                         fontFamily: 'Montserrat',
-                        fontStyle: 'bold',
+                        fontStyle: '600',
                         align: 'left', 
                     });
                     var v = new Konva.Text({
@@ -330,7 +322,7 @@ class View {
                         text: value,
                         fontSize: 12,
                         fontFamily: 'Montserrat',
-                        fontStyle: 'normal',
+                        fontStyle: '300',
                         align: 'left', 
                     });
                     gI.add(k);
@@ -365,16 +357,16 @@ class View {
                 that.infoForm.add(iC);
                 that.infoForm.add(iY);
                 if(width<height){
-                    backButton.y(formForm.y() + formForm.height() - 20 - backForm.height());
-                    backButton.x(formForm.x() + formForm.width()/2 - backForm.width()/2);
-                    console.log(formForm.x(), backForm.width()/2);
-                    that.infoForm.add(backButton);
+                    // backButton.y(formForm.y() + formForm.height() - 20 - backForm.height());
+                    // backButton.x(formForm.x() + formForm.width()/2 - backForm.width()/2);
+                    // console.log(formForm.x(), backForm.width()/2);
+                    // that.infoForm.add(backButton);
                 }
                 // Hien ra
                 var nextPage = new Konva.Text({
                     x: 0,
                     y: 0,
-                    width: formForm.width() - 40,
+                    width: (formForm.width() - 40)/2,
                     text: "Xem tiếp >",
                     fontSize: 15,
                     fontFamily: 'Montserrat',
@@ -382,7 +374,7 @@ class View {
                     align: 'right', 
                 });
                 nextPage.position({
-                    x: 15,
+                    x: formForm.width() - nextPage.width() - 15,
                     y: formForm.height() - 15 - nextPage.height()
                 })
                 nextPage.on("mouseover", function(e){
@@ -395,13 +387,48 @@ class View {
                     // console.log(project);
                     window.open(project.url, "_blank");
                 });
-                that.infoForm.add(nextPage);
-                that.infoForm.show();
+                if(project.url){
+                    that.infoForm.add(nextPage);
+                }
+                // that.infoForm.show();
+
+                var backPage = new Konva.Text({
+                    x: 0,
+                    y: 0,
+                    width: (formForm.width() - 40)/2,
+                    text: "< Trở lại",
+                    fontSize: 15,
+                    fontFamily: 'Montserrat',
+                    fontStyle: 'bold',
+                    align: 'left', 
+                });
+                backPage.position({
+                    x: 15,
+                    y: formForm.height() - 15 - nextPage.height()
+                })
+                backPage.on("mouseover", function(e){
+                    nextPage.fontSize(17);
+                });
+                backPage.on("mouseout", function(e){
+                    nextPage.fontSize(15);
+                });
+                backPage.on("click tap", function(e){
+                    console.log(e);
+                    // that.infoForm.hide();
+                    that.__toggleInfo("hello");
+                    that.listProject.show();
+                });
+                if(width<height){
+                    that.infoForm.add(backPage);
+                }
+                // that.infoForm.show();
+                that.__toggleInfo("info");
             });
 
         }
         // Ve cai thang info va them du lieu
-        that.infoForm.hide();
+        // that.infoForm.hide();
+        that.__toggleInfo("hello");
         that.layer2.add(that.infoForm);
 
 
@@ -429,7 +456,7 @@ class View {
             // Tren mobile
             that.listProject = new Konva.Group({
                 x: 50,
-                y: 238,
+                y: 50,
             });
             var formList = new Konva.Rect({
                 stroke: '#B14406',
@@ -526,11 +553,13 @@ class View {
             item.on('click', function(){
                 // Mo / chuyen thong tin
                 that.infoForm.updateData(project);
-                that.infoForm.show();
+                // that.infoForm.show();
+                that.__toggleInfo("info");
             });
             item.on('tap', function(){
                 that.infoForm.updateData(project);
-                that.infoForm.show()
+                // that.infoForm.show()
+                that.__toggleInfo("info");
                 that.listProject.hide();
             })
         }
@@ -565,37 +594,110 @@ class View {
 
         that.listProject.hide();
         that.layer2.add(that.listProject);
+
+        // LOGO
+        that.logo = new Konva.Group();
+        var textLogo = new Konva.Text({
+            fill: "#B14406",
+            text: "OUR PORTFOLIO",
+            fontSize: 28,
+            fontStyle: '800',
+            fontFamily: 'Montserrat',
+            align: 'left',
+        });
+        var imgLogo = new Image();
+        imgLogo.onload = function(){
+            var imageLogo = new Konva.Image({
+                image: imgLogo,
+                height: textLogo.height(), 
+                scaleX: textLogo.height() / imgLogo.height
+            });
+            imageLogo.position({
+                x: textLogo.width() + 10,
+                y: (textLogo.height() - imageLogo.height())/2
+            })
+            
+            that.logo.add(textLogo);
+            that.logo.add(imageLogo);
+            that.logo.width(imageLogo.x() + imageLogo.width());
+            that.logo.height(Math.max(imageLogo.height(), textLogo.height()));
+            that.logo.position({
+                x: 50,
+                y: that.stage.height() - 100
+            });
+            that.layer2.add(that.logo);
+        };
+        imgLogo.src = "/v14.png";
+
+        // HELLO
+        that.hello = new Konva.Group();
+        if(width>height){
+            that.hello.width(300);
+        }
+        var t1Hello = new Konva.Text({
+            text: "YOUR DREAM",
+            width: that.hello.width(),
+            fontSize: 28,
+            fontStyle: '700',
+            fontFamily: 'Montserrat',
+            align: 'left',
+        });
+        var t2Hello = new Konva.Text({
+            text: "WE BUILD",
+            width: that.hello.width(),
+            fontSize: 28,
+            fontStyle: '700',
+            fontFamily: 'Montserrat',
+            align: 'right',
+        });
+        var cHello = new Konva.Text({
+            text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Faucibus ut sapien vel quis vel dui. Sed libero cras urna nisl ut ut feugiat. Et ut duis duis lorem et mauris. Eget aliquam aliquet varius et sollicitudin. Fringilla dignissim aenean massa, aliquet neque, neque dis rhoncus, nulla. ",
+            width: that.hello.width(),
+            fontSize: 12,
+            fontStyle: '400',
+            fontFamily: 'Montserrat',
+            align: 'left',
+        });
+        t2Hello.position({
+            y: t1Hello.height()
+        });
+        cHello.position({
+            y: t2Hello.y() + t2Hello.height() + 30
+        });
+        that.hello.add(t1Hello);
+        that.hello.add(t2Hello);
+        that.hello.add(cHello);
+        that.hello.position({
+            x: 50,
+            y: 50
+        });
+        that.layer2.add(that.hello);
     }
     _setNewPosition(newPos, callback){
         var that = this;
         var nowPos = this._getCenterMap();
         var delPos = subPos(newPos, nowPos);
-        var TIMESMOOD = 100;
-        var stepPos = 500;
-        function findMax(d, s){
-            var a = divPos(d, stepPos);
-            var m = Math.max(Math.abs(a.x), Math.abs(a.y));
-            return m;
+        var TIMESMOOD = 20;
+        var STEPPOS = 50;
+        var direcPos = {
+            x: 1,
+            y: 1
         }
+        // STEP
+        delPos = divPos(delPos, STEPPOS);
+        var N = Math.round(Math.max(Math.abs(delPos.x), Math.abs(delPos.y)));
+        var sPos = divPos(subPos(newPos, nowPos), N);
+        var k = 0;
+        // console.log("HERE");
         var d = setInterval(function(){
-            nowPos = that._getCenterMap();
-            delPos = subPos(newPos, nowPos);
-            var N = findMax(delPos);
-            if(N < 1){
-                clearInterval(d);
-                that._setCenter(newPos);
+            if(k < N){
+                k = k + 1;
+                that._setCenter(addPos(nowPos, mulPos(sPos, k)));
             } else {
-                var o = {
-                    x: 500, 
-                    y: 500
+                clearInterval(d);
+                if(callback){
+                    callback(newPos);
                 }
-                if(delPos.x < 0){
-                    o.x = -500;
-                }
-                if(delPos.y < 0){
-                    o.y = -500;
-                }
-                that._setCenter(addPos(nowPos, o));
             }
         }, TIMESMOOD);
     }
@@ -605,28 +707,36 @@ class View {
         var oldScale = that.layer1.scaleX();
         var TILEZOOM = 0.1;
         var SMOODTIME = 50;
-        var n = Math.abs(newScale - oldScale)/TILEZOOM;
-        var direction;
-        if(newScale > oldScale){
-            direction = 1;
-        } else {
-            direction = -1;
-        }
-        var nScale = oldScale;
-        var i = 0;
-        var d = setInterval(function(){
-            nScale = oldScale + i*direction*TILEZOOM;
-            that.layer1.scale({ x: nScale, y: nScale});
-            that._setCenter(posCenter);
-            that.__notChangeWhenZoom()
-            i = i + 1;
-            if(i > n){
-                clearInterval(d);
-                if(callback){
-                    callback();
-                } 
+        var n = Math.round(Math.abs(newScale - oldScale)/TILEZOOM);
+        // console.log("COUNTER:", n);
+        if(n > 0){
+            var direction;
+            if(newScale > oldScale){
+                direction = 1;
+            } else {
+                direction = -1;
             }
-        }, SMOODTIME);
+            var nScale = oldScale;
+            var i = 0;
+            var nowPos = this._getCenterMap();
+            var sPos = divPos(subPos(posCenter, nowPos), n);
+            var d = setInterval(function(){
+                nScale = oldScale + i*direction*TILEZOOM;
+                that.layer1.scale({ x: nScale, y: nScale});
+                that._setCenter(addPos(nowPos, mulPos(sPos, i)));
+                that.__notChangeWhenZoom()
+                i = i + 1;
+                if(i > n){
+                    clearInterval(d);
+                    if(callback){
+                        callback();
+                    } 
+                }
+            }, SMOODTIME);
+        } else {
+            that._setNewPosition(posCenter, callback);
+        }
+
     }
     __notChangeWhenZoom(){
         var that = this;
@@ -658,22 +768,7 @@ class View {
         that.layer1.scale({ x: newScale, y: newScale });
     
         // Cac thong so khong thay doi khi scale
-        // Kich thuoc marker
-        that.markers.forEach(function(marker){
-            marker.scale({
-                x: 1/newScale,
-                y: 1/newScale
-            })
-            marker.center(1/newScale);
-        })
-        // Kich thuoc info marker
-        that.infoMarker.scale({
-            x: 1/newScale,
-            y: 1/newScale
-        });
-
-        // Khoang cach info marker
-        that.infoMarker.adjustIndex();
+        that.__notChangeWhenZoom();
         
         var newPos = {
             x: pointer.x - mousePointTo.x * newScale,
@@ -700,7 +795,7 @@ class View {
             x: -1 * pL.x * this.layer1.scaleX() + this.stage.width()/2,
             y: -1 * pL.y * this.layer1.scaleY() + this.stage.height()/2
         };
-        console.log(newPos);
+        // console.log(newPos, pos);
         that.stage.position(newPos);
         that.layer2.x(-newPos.x);
         that.layer2.y(-newPos.y);
@@ -722,7 +817,8 @@ class View {
                 case 2: {
                     that.lockBackground = 0;
                     that.listProject.hide();
-                    that.infoForm.hide();
+                    // that.infoForm.hide();
+                    that.__toggleInfo("hello");
                     that.normalMarker();
                     that.oldForcusMarker = undefined;
                 }
@@ -748,7 +844,25 @@ class View {
             } else {
                 return;
             }
-            that._zoom(mousePointTo, direction, oldScale, pointer);
+
+            var newScale = direction > 0 ? oldScale * that.scaleBy : oldScale / that.scaleBy;
+            if(newScale < 1){
+                newScale = 1;
+            }
+            that.layer1.scale({ x: newScale, y: newScale });
+        
+            // Cac thong so khong thay doi khi scale
+            that.__notChangeWhenZoom();
+            
+            var newPos = {
+                x: pointer.x - mousePointTo.x * newScale,
+                y: pointer.y - mousePointTo.y * newScale,
+            };
+
+            // Cap nhat vi tri
+            that.layer2.x(-newPos.x);
+            that.layer2.y(-newPos.y);
+            that.stage.position(newPos);
         });
 
         that.stage.on('touchmove', function(e){
@@ -758,6 +872,7 @@ class View {
             // alert(touch2);
             // alert(touch1);
             if (touch1 && touch2) {
+                // Wheel
                 if (that.stage.isDragging()) {
                     that.stage.stopDrag();
                 }
@@ -791,32 +906,39 @@ class View {
                 //Scale
                 // alert("HERE-1");
                 var oldScale = that.layer1.scaleX();
-                var newScale = oldScale * (dist / lastDist);
+                var newScale;
+                if(dist / lastDist > 1){
+                    newScale = oldScale * 1.005;
+                } else if (dist / lastDist < 1){
+                    newScale = oldScale * 0.995;
+                } else {
+                    newScale = oldScale;
+                }
                 if(newScale < 1){
                     newScale = 1;
                 }
+                // that._setZoom(newScale, that._getCenterMap(newCenter));
                 that.layer1.scale({ x: newScale, y: newScale });
             
-                // Cac thong so khong thay doi khi scale
-                // Kich thuoc marker
-                that.markers.forEach(function(marker){
-                    marker.scale({
-                        x: 1/newScale,
-                        y: 1/newScale
-                    })
-                    marker.center(1/newScale);
-                })
-                // Kich thuoc info marker
-                that.infoMarker.scale({
-                    x: 1/newScale,
-                    y: 1/newScale
-                });
-    
-                // Khoang cach info marker
-                that.infoMarker.adjustIndex();
-                that.stage.position(newPos);
-                that.layer2.x(-newPos.x);
-                that.layer2.y(-newPos.y);
+                // // Cac thong so khong thay doi khi scale
+                // // Kich thuoc marker
+                that.__notChangeWhenZoom();
+                
+                // calculate new position of the stage
+                var dx = newCenter.x - lastCenter.x;
+                var dy = newCenter.y - lastCenter.y;
+
+                var newPos = {
+                    x: newCenter.x - pointTo.x * scale + dx,
+                    y: newCenter.y - pointTo.y * scale + dy,
+                };
+                that._setCenter(that._getCenterMap(addPos(newCenter, {x: dx, y: dy})));
+                // that.stage.position(newPos);
+                // that.layer2.x(-newPos.x);
+                // that.layer2.y(-newPos.y);
+
+                lastDist = dist;
+                lastCenter = newCenter;
 
             } else {
                 var mousePos = that.stage.getPointerPosition();
@@ -906,7 +1028,7 @@ class View {
             var h = that.stage.height();
             if(w > h){
                 var s = (1/(3/4-1/4))*h/that.imgBackground.height;
-                console.log(s);
+                // console.log(s);
                 s = 0.2;
                 that.background.scaleX(s);
                 that.background.scaleY(s);
@@ -916,7 +1038,7 @@ class View {
                 
                 // that.stage.x(-(1/16)*wi);
                 // that.stage.y(-(1/4-1/16)*hi);
-                that._setCenter({x: 4304, y: 2559});
+                that._setCenter({x: 4304 - 500, y: 2559});
                 // that.layer2.x((1/16)*wi);
                 // that.layer2.y((1/4-1/16)*hi);
             } else {
@@ -933,7 +1055,7 @@ class View {
 
                 // that.layer2.x((1/2 - 1/16)*wi);
                 // that.layer2.y((1/4-1/8)*hi);   
-                that._setCenter({x: 4304, y: 2559});
+                that._setCenter({x: 4304 - 500, y: 2559});
             }
         }
 
@@ -1011,6 +1133,8 @@ class View {
         // Chức năng - tương tác tại đây
         mk.on('click tap', function(e){
             that.showInfo(mk.data.projects);
+            that._setZoom(3, mk.data);
+            that.infoMarker.show();
             that.markers.forEach(function(mke){
                 if(mke._id == mk._id){
                     mke.opacity(1);
@@ -1026,6 +1150,9 @@ class View {
 
         mk.on('mouseout', function(){
             that.infoMarker.hide();
+            if(that.lockBackground == 2){
+                that.infoMarker.show();
+            }
         });
 
         // TOUCH PAD
@@ -1058,9 +1185,12 @@ class View {
             
         });
     }
-    _getCenterMap(){
+    _getCenterMap(pos){
         var that = this;
         var nowPos = that.stage.position();
+        if(pos){
+            nowPos = pos;
+        }
         var pB = {
             x: (nowPos.x - that.stage.width()/2)/(-1*that.layer1.scaleX())/that.background.scaleX(),
             y: (nowPos.y - that.stage.height()/2)/(-1*that.layer1.scaleY())/that.background.scaleY()
@@ -1074,7 +1204,7 @@ class View {
                 data: that._getCenterMap()
             }
         }
-        that._setZoom(1, {x: this.oldForcusMarker.data.x, y: this.oldForcusMarker.data.y}, function(){      // Toa do da nang
+        that._setZoom(1, this.oldForcusMarker.data, function(){      // Toa do da nang
             // Opacity
             that.markers.forEach(function(mk){
                 if(mk._id == marker._id){
