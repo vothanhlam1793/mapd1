@@ -98,7 +98,6 @@ class View {
             // set font style when font is loaded
             // so Konva will recalculate text wrapping if it has limited width
             complexText.fontFamily('Montserrat');
-            console.log(complexText);
         });
     }
     _initInfo(){
@@ -138,11 +137,11 @@ class View {
                 var formForm = new Konva.Rect({
                     x: 0,
                     y: 0,
-                    stroke: '#555',
+                    stroke: '#B14406',
                     strokeWidth: 2,
-                    fill: '#ddd',
-                    width: width/3,
-                    height: height - 100,
+                    fill: '#FFFFFF',
+                    width: 363,
+                    height: 547,
                     shadowColor: 'black',
                     shadowBlur: 10,
                     shadowOffsetX: 10,
@@ -155,9 +154,9 @@ class View {
                 var formForm = new Konva.Rect({
                     x: 0,
                     y: 0,
-                    stroke: '#555',
+                    stroke: '#B14406',
                     strokeWidth: 2,
-                    fill: '#ddd',
+                    fill: '#FFFFFF',
                     width: width - 100,
                     height: height - 200,
                     shadowColor: 'black',
@@ -175,34 +174,34 @@ class View {
             var titleForm = new Konva.Text({
                 x: 0,
                 y: 0,
-                text: "Thông tin dự án\n" + project.title,
-                fontSize: 18,
-                fontFamily: 'Calibri',
-                fill: '#555',
-                padding: 10,
-                align: 'center',
+                text: project.title,
+                width: formForm.width() - 30,
+                fontSize: 40,
+                fontFamily: 'Montserrat',
+                align: 'left',
             });
 
             // Gioi thieu
-            var contentForm = new Konva.Text({
-                x: 25,
-                text: project.content,
-                fontSize: 18,
-                fontFamily: 'Calibri',
-                fill: '#555',
-                padding: 10,
-                align: 'center',
-            });
+            // var contentForm = new Konva.Text({
+            //     x: 25,
+            //     text: project.content,
+            //     fontSize: 18,
+            //     fontFamily: 'Montserrat',
+            //     fill: '#555',
+            //     padding: 10,
+            //     align: 'center',
+            // });
 
             var contentImage = new Konva.Image({
                 x: 25
             })
 
             var backButton = new Konva.Group();
+
             var backText = new Konva.Text({
                 text: "Trở lại",
                 fontSize: 18,
-                fontFamily: 'Calibri',
+                fontFamily: 'Montserrat',
                 fill: '#555',
                 padding: 10,
                 align: 'center',
@@ -228,13 +227,14 @@ class View {
                 that.listProject.show();
             })
             // Tao mot doi tuong tai day
-            that.getContentImage(contentImage, project.content, formForm);
+            // that.getContentImage(contentImage, project.content, formForm);
+
 
             var linkForm = new Konva.Text({
                 x: 25,
                 text: "Xem dự án",
                 fontSize: 18,
-                fontFamily: 'Calibri',
+                fontFamily: 'Montserrat',
                 fill: '#555',
                 padding: 10,
                 align: 'center',
@@ -243,33 +243,87 @@ class View {
             linkForm.on("click tap", function(){
                 window.open("https://creta.vn", "_blank");
             });
+
             var urlImage = "/image/test.jpg"; //default
             if(project.image){
                 urlImage = project.image.publicUrl;
             }
             // Anh
             Konva.Image.fromURL(urlImage, function(imageNode){
-                var wMax = formForm.width() - 50;
+                var wMax = 337;
                 var w = imageNode.image().width;
                 imageNode.setAttrs({
-                    x: 25,
-                    y: titleForm.height() + 20,
+                    x: (formForm.width() - wMax)/2,
+                    y: 15,
                     width: wMax,
                     scaleY: wMax / w
                 });
                 
                 // contentForm.y(imageNode.y() + imageNode.height()*imageNode.scaleY() + 20);
-                contentImage.y(imageNode.y() + imageNode.height()*imageNode.scaleY() + 20);
+                // contentImage.y(imageNode.y() + imageNode.height()*imageNode.scaleY() + 20);
                 // linkForm.y(contentForm.y() + contentForm.height() + 20);
-                linkForm.y(contentForm.y() + contentImage.height() + 20);
+                // linkForm.y(contentForm.y() + contentImage.height() + 20);
+                titleForm.position({
+                    x: 15,
+                    y: imageNode.y() + imageNode.height()*imageNode.scaleY() + 15
+                });
 
                 that.infoForm.add(formForm);
-                that.infoForm.add(titleForm);
                 that.infoForm.add(imageNode);
-                // that.infoForm.add(contentForm);
-                that.infoForm.add(contentImage);
-                // that.infoForm.add(linkForm);
-                console.log(formForm.y() + formForm.height() - 20 - backForm.height());
+                that.infoForm.add(titleForm);
+
+                function createItemInfo(key, value){
+                    var gI = new Konva.Group();
+                    var k = new Konva.Text({
+                        x: 0,
+                        y: 0,
+                        text: key + ": ",
+                        fontSize: 12,
+                        fontFamily: 'Montserrat',
+                        fontStyle: 'bold',
+                        align: 'left', 
+                    });
+                    var v = new Konva.Text({
+                        x: k.width(),
+                        y: 0,
+                        width: formForm.width() - 30 - k.width(),
+                        text: value,
+                        fontSize: 12,
+                        fontFamily: 'Montserrat',
+                        fontStyle: 'normal',
+                        align: 'left', 
+                    });
+                    gI.add(k);
+                    gI.add(v);
+                    gI.height(v.height());
+                    gI.width(formForm.width() - 30);
+                    return gI;
+                }
+                var iP = createItemInfo("Địa điểm", project.place);
+                iP.position({
+                    y: titleForm.y() + titleForm.height() + 15,
+                    x: 15
+                })
+                var iW = createItemInfo("Hạng mục", project.work);
+                iW.position({
+                    x: 15,
+                    y: iP.y() + iP.height() + 5
+                })
+                var iC = createItemInfo("Thể loại công trình", project.category);
+                iC.position({
+                    x: 15,
+                    y: iW.y() + iW.height() + 5
+                })
+                var iY = createItemInfo("Năm hoàn thành", project.category);
+                iY.position({
+                    x: 15,
+                    y: iC.y() + iC.height() + 5
+                })
+
+                that.infoForm.add(iP);
+                that.infoForm.add(iW);
+                that.infoForm.add(iC);
+                that.infoForm.add(iY);
                 if(width<height){
                     backButton.y(formForm.y() + formForm.height() - 20 - backForm.height());
                     backButton.x(formForm.x() + formForm.width()/2 - backForm.width()/2);
@@ -277,6 +331,31 @@ class View {
                     that.infoForm.add(backButton);
                 }
                 // Hien ra
+                var nextPage = new Konva.Text({
+                    x: 0,
+                    y: 0,
+                    width: formForm.width() - 40,
+                    text: "Xem tiếp >",
+                    fontSize: 15,
+                    fontFamily: 'Montserrat',
+                    fontStyle: 'bold',
+                    align: 'right', 
+                });
+                nextPage.position({
+                    x: 15,
+                    y: formForm.height() - 15 - nextPage.height()
+                })
+                nextPage.on("mouseover", function(e){
+                    nextPage.fontSize(17);
+                });
+                nextPage.on("mouseout", function(e){
+                    nextPage.fontSize(15);
+                });
+                nextPage.on("click tap", function(e){
+                    // console.log(project);
+                    window.open(project.url, "_blank");
+                });
+                that.infoForm.add(nextPage);
                 that.infoForm.show();
             });
 
@@ -294,11 +373,11 @@ class View {
                 y: 150,
             });
             var formList = new Konva.Rect({
-                stroke: '#555',
+                stroke: '#B14406',
                 strokeWidth: 2,
-                fill: '#ddd',
-                width: width/5,
-                height: height - 300,
+                fill: '#FFFFFF',
+                width: 217,
+                height: 372,
                 shadowColor: 'black',
                 shadowBlur: 10,
                 shadowOffsetX: 10,
@@ -307,14 +386,15 @@ class View {
                 cornerRadius: 10,
             })
         } else {
+            // Tren mobile
             that.listProject = new Konva.Group({
                 x: 50,
-                y: 100,
+                y: 238,
             });
             var formList = new Konva.Rect({
-                stroke: '#555',
+                stroke: '#B14406',
                 strokeWidth: 2,
-                fill: '#ddd',
+                fill: '#FFFFFF',
                 width: width - 100,
                 height: height - 200,
                 shadowColor: 'black',
@@ -329,62 +409,79 @@ class View {
         var titleList = new Konva.Text({
             text: "Các dự án Đà Nẵng",
             fontSize: 18,
-            fontFamily: 'Calibri',
+            fontFamily: 'Montserrat',
             fill: '#555',
             padding: 10,
             align: 'center',
         });
         that.listProject.add(formList);
-        that.listProject.add(titleList);
+        // that.listProject.add(titleList);
 
         var list = new Konva.Group({
-            x: 25,
-            y: titleList.height() + 50,
+            x: 15,
+            y: 15,
             name: 'list'
         });
 
-        list.createItem = function(project){
+        list.createItem = function(project, callback){
+            
             var item = new Konva.Group();
             var titleItem = new Konva.Text({
                 text: project.title,
-                fontSize: 18,
-                fontFamily: 'Calibri',
-                fill: '#555',
+                fontSize: 12,
+                fontFamily: 'Montserrat',
                 padding: 10,
-                align: 'center',
+                align: 'left',
             });
-            if(width>height){
-                var rectItem = new Konva.Rect({
-                    stroke: '#555',
-                    strokeWidth: 2,
-                    fill: '#aaa',
-                    width: width/5 - 50,
-                    height: titleItem.height(),
-                    shadowColor: 'black',
-                    shadowBlur: 10,
-                    shadowOffsetX: 10,
-                    shadowOffsetY: 10,
-                    shadowOpacity: 0.2,
-                    cornerRadius: 10,
+            var imgItem = new Image();
+            imgItem.onload = function(){
+                var imageItem = new Konva.Image({
+                    image: imgItem,
+                    width: 45,
+                    height: 47,
                 });
-            } else {
-                var rectItem = new Konva.Rect({
-                    stroke: '#555',
+                var itemRect = new Konva.Rect({
+                    stroke: '#B14406',
                     strokeWidth: 2,
-                    fill: '#aaa',
-                    width: width - 150,
-                    height: titleItem.height(),
-                    shadowColor: 'black',
-                    shadowBlur: 10,
-                    shadowOffsetX: 10,
-                    shadowOffsetY: 10,
-                    shadowOpacity: 0.2,
-                    cornerRadius: 10,
+                    cornerRadius: 5,
+                    width: imageItem.width() + 5,
+                    height: imageItem.height() + 5
+                })
+                imageItem.position({
+                    x: (itemRect.width() - imageItem.width())/2,
+                    y: (itemRect.height() - imageItem.width())/2
                 });
+                titleItem.position({
+                    x: itemRect.width() + 5,
+                    y: (itemRect.height() - titleItem.height())/ 2
+                });
+                var borderItem = new Konva.Rect({
+                    height: itemRect.height(),
+                    width: formList.width() - 20,
+                    cornerRadius: 10,
+                })
+                item.add(borderItem);
+                item.add(itemRect);
+                item.add(imageItem);
+                item.add(titleItem);
+                item.h = borderItem.height();
+                item.height(borderItem.height());
+                item.width(borderItem.width());     
+                item.on("mouseover", function(e){
+                    borderItem.fill("#555555");
+                })
+                item.on("mouseout", function(e){
+                    borderItem.fill("#FFFFFF");
+                })
+                if(callback){
+                    callback(item);
+                }        
             }
-            item.add(rectItem);
-            item.add(titleItem);
-            item.h = titleItem.height();
+            if(project.image){
+                imgItem.src = project.image.publicUrl; //src image
+            } else {
+                imgItem.src = "/my_image.png"; //src image
+            }
 
             item.on('click', function(){
                 // Mo / chuyen thong tin
@@ -396,7 +493,6 @@ class View {
                 that.infoForm.show()
                 that.listProject.hide();
             })
-            return item;
         }
 
         that.listProject.createList = function(projects){
@@ -416,9 +512,11 @@ class View {
 
             // Tao cai moi
             for(var i = 0; i < that.projects.length; i++){
-                let item = lists[0].createItem(projects[i]);
-                item.y(i * item.h + 10*i);
-                lists[0].add(item);
+                lists[0].createItem(projects[i], function(item){
+                    var j = lists[0].children.length;
+                    item.y(j * item.h + 12*j);
+                    lists[0].add(item);
+                });
             }
             that.listProject.show();
             that.lockBackground = 1;

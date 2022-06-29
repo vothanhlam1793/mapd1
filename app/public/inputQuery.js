@@ -22,6 +22,11 @@ query ($id: ID!){
         }
         title
         content
+        place
+        category
+        work
+        year
+        url
     }
 }
 `
@@ -39,6 +44,11 @@ query {
         id
         title
         content
+        place
+        category
+        work
+        year
+        url
         image {
           publicUrl
         }
@@ -65,6 +75,11 @@ query {
         }
         title
         content
+        place
+        category
+        work
+        year
+        url
     }
 }
 `
