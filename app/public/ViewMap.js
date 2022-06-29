@@ -11,6 +11,45 @@ function getCenter(p1, p2) {
 var lastCenter = null;
 var lastDist = 0;
 
+
+function outLayer(pos, pLayer){
+    return {
+      x: pos.x*pLayer.scaleX() + pLayer.x(),
+      y: pos.y*pLayer.scaleY() + pLayer.y(),
+    }
+}
+
+function inLayer(pos, layer){
+    return {
+      x: (pos.x - layer.x())/layer.scaleX(),
+      y: (pos.y - layer.y())/layer.scaleY()
+    }
+}
+
+function addPos(pos1, pos2){
+    return {
+        x: pos1.x + pos2.x,
+        y: pos1.y + pos2.y
+    };
+}
+function subPos(pos1, pos2){
+    return {
+        x: pos1.x - pos2.x,
+        y: pos1.y - pos2.y
+    };
+}
+function divPos(pos, n){
+    return {
+        x: pos.x / n,
+        y: pos.y / n
+    }
+}
+function mulPos(pos, n){
+    return {
+        x: pos.x * n,
+        y: pos.y * n
+    }
+}
 class View {
     constructor(ctn, w, h){
         this.stage = new Konva.Stage({
@@ -18,6 +57,7 @@ class View {
             width: w,
             height: h
         });
+        this.stage.getContainer().style.backgroundColor = 'rgba(237,237,237,255)';
         this.layer1 = new Konva.Layer({
             // draggable: true,
         });
@@ -526,6 +566,39 @@ class View {
         that.listProject.hide();
         that.layer2.add(that.listProject);
     }
+    _setNewPosition(newPos, callback){
+        var that = this;
+        var nowPos = this._getCenterMap();
+        var delPos = subPos(newPos, nowPos);
+        var TIMESMOOD = 100;
+        var stepPos = 500;
+        function findMax(d, s){
+            var a = divPos(d, stepPos);
+            var m = Math.max(Math.abs(a.x), Math.abs(a.y));
+            return m;
+        }
+        var d = setInterval(function(){
+            nowPos = that._getCenterMap();
+            delPos = subPos(newPos, nowPos);
+            var N = findMax(delPos);
+            if(N < 1){
+                clearInterval(d);
+                that._setCenter(newPos);
+            } else {
+                var o = {
+                    x: 500, 
+                    y: 500
+                }
+                if(delPos.x < 0){
+                    o.x = -500;
+                }
+                if(delPos.y < 0){
+                    o.y = -500;
+                }
+                that._setCenter(addPos(nowPos, o));
+            }
+        }, TIMESMOOD);
+    }
     _setZoom(newScale, posCenter, callback){
         // Hieu ung luon nha :))
         var that = this;
@@ -622,10 +695,12 @@ class View {
             x: pos.x*this.background.scaleX(),
             y: pos.y*this.background.scaleY()
         };
+        
         var newPos = {
             x: -1 * pL.x * this.layer1.scaleX() + this.stage.width()/2,
             y: -1 * pL.y * this.layer1.scaleY() + this.stage.height()/2
         };
+        console.log(newPos);
         that.stage.position(newPos);
         that.layer2.x(-newPos.x);
         that.layer2.y(-newPos.y);
@@ -831,32 +906,34 @@ class View {
             var h = that.stage.height();
             if(w > h){
                 var s = (1/(3/4-1/4))*h/that.imgBackground.height;
-                
+                console.log(s);
+                s = 0.2;
                 that.background.scaleX(s);
                 that.background.scaleY(s);
     
                 var wi = that.background.width()*that.background.scaleX();
                 var hi = that.background.height()*that.background.scaleY();
                 
-                that.stage.x(-(1/16)*wi);
-                that.stage.y(-(1/4-1/16)*hi);
-
-                that.layer2.x((1/16)*wi);
-                that.layer2.y((1/4-1/16)*hi);
+                // that.stage.x(-(1/16)*wi);
+                // that.stage.y(-(1/4-1/16)*hi);
+                that._setCenter({x: 4304, y: 2559});
+                // that.layer2.x((1/16)*wi);
+                // that.layer2.y((1/4-1/16)*hi);
             } else {
                 var s = (1/(7/8-1/2))*w/that.imgBackground.width;
-                
+                console.log(s);
                 that.background.scaleX(s);
                 that.background.scaleY(s);
     
                 var wi = that.background.width()*that.background.scaleX();
                 var hi = that.background.height()*that.background.scaleY();
                 
-                that.stage.x(-(1/2 - 1/16)*wi);
-                that.stage.y(-(1/4-1/8)*hi);   
+                // that.stage.x(-(1/2 - 1/16)*wi);
+                // that.stage.y(-(1/4-1/8)*hi);   
 
-                that.layer2.x((1/2 - 1/16)*wi);
-                that.layer2.y((1/4-1/8)*hi);   
+                // that.layer2.x((1/2 - 1/16)*wi);
+                // that.layer2.y((1/4-1/8)*hi);   
+                that._setCenter({x: 4304, y: 2559});
             }
         }
 
@@ -981,41 +1058,24 @@ class View {
             
         });
     }
+    _getCenterMap(){
+        var that = this;
+        var nowPos = that.stage.position();
+        var pB = {
+            x: (nowPos.x - that.stage.width()/2)/(-1*that.layer1.scaleX())/that.background.scaleX(),
+            y: (nowPos.y - that.stage.height()/2)/(-1*that.layer1.scaleY())/that.background.scaleY()
+        }
+        return pB;
+    }
     forcusMarker(marker){
         var that = this;
         if(!this.oldForcusMarker){
-            // STAGE 
-            var pS = {
-                x: this.stage.x() + this.stage.width()/2,
-                y: this.stage.y() + this.stage.height()/2
-            }
-            console.log(pS);
-            // LAYER 1
-            var pL = {
-                x: -pS.x/this.layer1.scaleX(),
-                y: -pS.y/this.layer1.scaleY()
-            }
-            console.log(pL);
-            // BACKGROUND
-            var pB = {
-                x: pL.x/this.background.scaleX(),
-                y: pL.y/this.background.scaleY()
-            }
-            this.oldForcusMarker = {        // Toa do da nang
-                data: pB
-            }
-            console.log(pB);
-
             this.oldForcusMarker = {
-                data: {
-                    x: 4304,
-                    y: 2559
-                }
+                data: that._getCenterMap()
             }
         }
         that._setZoom(1, {x: this.oldForcusMarker.data.x, y: this.oldForcusMarker.data.y}, function(){      // Toa do da nang
             // Opacity
-            console.log(marker);
             that.markers.forEach(function(mk){
                 if(mk._id == marker._id){
                     mk.opacity(1);
