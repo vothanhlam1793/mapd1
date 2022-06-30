@@ -1085,7 +1085,7 @@ class View {
             marker.destroy();
         });
         this.markers = [];
-        
+        that.selectMarker = new SelectView("Chọn địa điểm");
         // Ve lai marker
         markers.forEach(function(marker){
             if(all){
@@ -1098,7 +1098,27 @@ class View {
             var marker = that.getMarker(marker);
             that.layer1.add(marker);
             that.markers.push(marker);
+            that.selectMarker.addItem(marker.data.name, function(){
+                that.forcusMarker(marker);
+            });
         });
+
+        if(width>height){
+            that.selectMarker.formSelect.position({
+                x: width/4*3,
+                y: height - 100,
+            })
+        } else {
+            that.selectMarker.formSelect.position({
+                x: (width - that.selectMarker.formSelect.width())/2,
+                y: height - 50,
+            })
+        }
+        setTimeout( function(){
+            that.selectMarker.formSelect.children[1].text("Chọn vị trí");
+        }, 2000)
+        that.selectMarker.showUp();
+        that.layer2.add(that.selectMarker.formSelect);
         
     }
     getMarker(marker){
