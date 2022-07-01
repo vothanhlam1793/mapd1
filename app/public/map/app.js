@@ -63,3 +63,11 @@ class Controller {
 }
 
 const app = new Controller(new Model(), new View("canvas", width, height));
+
+// // Connect with parent
+// $(document).ready(function(){
+//     window.top.postMessage({
+//         a: "1",
+//         b: "Hello World 2"
+//     }, "*");
+// })

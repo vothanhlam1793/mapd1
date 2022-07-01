@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <%- include("head.ejs"); %>
+        <script src="/inputQuery.js"></script>
+        <script src="https://unpkg.com/konva@8/konva.min.js"></script>
+        <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+        <script src="/List.js"></script>
+        <script src="/Select.js"></script>
+        <link rel="stylesheet" href="/style.css">
+    </head>
+    <body class="">
+        <div id="canvas">
+
+        </div>
+        <script>
+        var stage = new Konva.Stage({
+            container: 'canvas',
+            width: 800,
+            height: 900,
+        });
+        var layer2 = new Konva.Layer({});
+        stage.add(layer2);
+        var s = new SelectView("Chọn địa điểm");
+        s.formSelect.position({
+          x: 300, 
+          y: 200
+        })
+        layer2.add(s.formSelect);
+        </script>
+    </body>
+</html>

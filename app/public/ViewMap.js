@@ -840,8 +840,12 @@ class View {
 
             let direction = e.evt.deltaY > 0 ? 1 : -1;
             if (e.evt.ctrlKey) {
-                direction = - direction;
+                direction = -direction;
             } else {
+                window.top.postMessage({
+                    type: "scroll",
+                    scrollY: e.evt.deltaY
+                })
                 return;
             }
 
@@ -941,31 +945,27 @@ class View {
                 lastCenter = newCenter;
 
             } else {
-                var mousePos = that.stage.getPointerPosition();
+                var mousePos = {
+                    x: touch1.clientX,
+                    y: touch1.clientY
+                }
                 var newPos = {
                     x: that.stage.x() + (mousePos.x - oldMouse.x),
                     y: that.stage.y() + (mousePos.y - oldMouse.y)
                 }
-                var maxWidth = that.layer1.width()*that.layer1.scale().x;
-                var maxHeight = that.layer1.height()*that.layer1.scale().y;
+                // var maxWidth = that.layer1.width()*that.layer1.scale().x;
+                // var maxHeight = that.layer1.height()*that.layer1.scale().y;
                 
-                // if(newPos.x < -(maxWidth - that.stage.width())){
-                //     newPos.x = -(maxWidth - that.stage.width());
-                // }
-                // if(newPos.x > 0){
-                //     newPos.x = 0;
-                // }
-                // if(newPos.y < -(maxHeight - that.stage.height())){
-                //     newPos.y = -(maxHeight - that.stage.height());
-                // }
-                // if(newPos.y > 0){
-                //     newPos.y = 0;
-                // }
-                that.stage.position(newPos);
-                that.layer2.x(-newPos.x);
-                that.layer2.y(-newPos.y);
+                // that.stage.position(newPos);
+                // that.layer2.x(-newPos.x);
+                // that.layer2.y(-newPos.y);
                 
-                oldMouse = mousePos;
+                window.top.postMessage({
+                    type: "scroll",
+                    scrollY:  - mousePos.y + oldStart.y
+                });
+                // console.log(- mousePos.y + oldMouse.y);
+                // oldStart = mousePos;
             }
         })
 
@@ -977,7 +977,14 @@ class View {
 
         var stateMouse = 0;
         var oldMouse = {};
-        that.stage.on('mousedown touchstart', function(){
+        var oldStart = {x: 0, y: 0}
+        that.stage.on("touchstart", function(e){
+            e.evt.preventDefault();
+            var touch1 = e.evt.touches[0];
+            oldStart.x = touch1.clientX;
+            oldStart.y = touch1.clientY;
+        })
+        that.stage.on('mousedown', function(){
             stateMouse = 1;
             oldMouse = that.stage.getPointerPosition();
         })
@@ -1162,6 +1169,7 @@ class View {
                     mke.opacity(0.5);
                 }
             });
+            console.log("Here");
         });
 
         mk.on('mouseover', function(){
@@ -1179,7 +1187,6 @@ class View {
         // mk.on('tap', function(e){
         //     that.onHandleMarker(e, this);
         // })
-
         that.extendMarker(mk);
         return mk;
     };
