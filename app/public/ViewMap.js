@@ -72,6 +72,8 @@ class View {
         });
         this.layer2 = new Konva.Layer();
 
+        this.layer3 = new Konva.Layer();
+
         this.scaleBy = 1.02;
 
         this.background = new Konva.Image();
@@ -93,7 +95,51 @@ class View {
         this._initInfo();
         this._initView();
         this._initInteractive();
+        this._initLayer3();
         this.onHandleMarker = function(){};
+    }
+    _initLayer3(){
+        var that = this;
+        this.notifyLayer = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: width,
+            height: height,
+            opacity: 0.8,
+            fill: 'gray'
+        });
+        var text = "Ctrl + Scroll -> Zoom";
+        if(width < height){
+            text = "Sử dụng hai ngón tay để di chuyển bản đồ"
+        }
+        this.notifyTextLayer = new Konva.Text({
+            x: 0,
+            y: 0,
+            width: width - 100,
+            shadowColor: 'black',
+            shadowBlur: 10,
+            shadowOffsetX: 10,
+            shadowOffsetY: 10,
+            shadowOpacity: 0.2,
+            text: text,
+            fontSize: 30,
+            align: 'center',
+        })
+        this.notifyTextLayer.position({
+            x: 50,
+            y: (height - this.notifyTextLayer.height())/2
+        });
+        this.layer3.showNotify = function(){
+            that.layer3.position({
+                x: -that.stage.x(),
+                y: -that.stage.y()
+            });
+            that.layer3.show();
+        }
+        this.layer3.add(this.notifyLayer);
+        this.layer3.add(this.notifyTextLayer);
+        this.layer3.hide();
+        this.stage.add(this.layer3);
     }
     __toggleInfo(t){
         if(t == "hello"){
@@ -879,6 +925,7 @@ class View {
         
         });
         this.layer1.on('click tap', function(){
+            that.layer3.hide();
             // console.log("laery1");
             switch(that.lockBackground){
                 case 0: {
@@ -900,6 +947,7 @@ class View {
 
         this.layer2.on('click', function(){
             // console.log("layer2");
+            that.layer3.hide();
         })
 
         this.stage.on('wheel', function(e){
@@ -919,9 +967,10 @@ class View {
                     type: "scroll",
                     scrollY: e.evt.deltaY
                 }, "*")
+                that.layer3.showNotify();
                 return;
             }
-
+            that.layer3.hide();
             var newScale = direction > 0 ? oldScale * that.scaleBy : oldScale / that.scaleBy;
             if(newScale < 1){
                 newScale = 1;
@@ -943,6 +992,7 @@ class View {
         });
 
         that.stage.on('touchmove', function(e){
+
             e.evt.preventDefault();
             var touch1 = e.evt.touches[0];
             var touch2 = e.evt.touches[1];
@@ -1018,6 +1068,7 @@ class View {
                     type: "scroll",
                     scrollY:  - mousePos.y + oldStart.y
                 }, "*");
+                that.layer3.showNotify();
                 // console.log(- mousePos.y + oldMouse.y);
                 // oldStart = mousePos;
             }
@@ -1026,6 +1077,7 @@ class View {
         that.stage.on('touchend', function () {
             lastDist = 0;
             lastCenter = null;
+            that.layer3.hide();
         });
 
 
@@ -1039,10 +1091,12 @@ class View {
             oldStart.y = touch1.clientY;
         })
         that.stage.on('mousedown', function(){
+            that.layer3.hide();
             stateMouse = 1;
             oldMouse = that.stage.getPointerPosition();
         })
         that.stage.on('mousemove', function(){
+            that.layer3.hide();
             if(stateMouse == 1){
                 var mousePos = that.stage.getPointerPosition();
                 var newPos = {
@@ -1059,6 +1113,7 @@ class View {
         })
         that.stage.on('mouseup', function(){
             stateMouse = 0;
+            that.layer3.hide();
         })
     }
     _initView(){
