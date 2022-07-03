@@ -57,6 +57,15 @@ class View {
             width: w,
             height: h
         });
+        this.language = {
+            title: ['Tên dự án','Name of project'],
+            place: ['Địa điểm','Place'],
+            category: ['Thể loại công trình','Category'],
+            work: ['Hạng mục','Work'],
+            year: ['Năm hoàn thành','Year'],
+            next: ["Xem tiếp >", "Detail >"],
+            back: ["< Trở lại", "< Back"]
+        }
         this.stage.getContainer().style.backgroundColor = 'rgba(237,237,237,255)';
         this.layer1 = new Konva.Layer({
             // draggable: true,
@@ -100,9 +109,7 @@ class View {
         var complexText = new Konva.Text({
             text: "Đà Nẵng",
             fontSize: 18,
-            // fill: '#555',
             fontStyle: 'bold',
-            // padding: 10,
             align: 'center',
             name: "nameMarker"
         });
@@ -288,13 +295,25 @@ class View {
             // Anh
             Konva.Image.fromURL(urlImage, function(imageNode){
                 var wMax = formForm.width() - 30;
+                var hMax = wMax * 1.8 / 3;
                 var w = imageNode.image().width;
-                imageNode.setAttrs({
-                    x: (formForm.width() - wMax)/2,
-                    y: 15,
-                    width: wMax,
-                    scaleY: wMax / w
-                });
+                var h = imageNode.image().height;
+                if(h * wMax / w > hMax){
+                    imageNode.setAttrs({
+                        x: (formForm.width() - w*hMax/h)/2,
+                        y: 15,
+                        height: hMax,
+                        scaleX: hMax / h
+                    });
+                } else {
+                    imageNode.setAttrs({
+                        x: (formForm.width() - wMax)/2,
+                        y: 15,
+                        width: wMax,
+                        scaleY: wMax / w
+                    });
+                }
+
                 titleForm.position({
                     x: 15,
                     y: imageNode.y() + imageNode.height()*imageNode.scaleY() + 15
@@ -331,22 +350,22 @@ class View {
                     gI.width(formForm.width() - 30);
                     return gI;
                 }
-                var iP = createItemInfo("Địa điểm", project.place);
+                var iP = createItemInfo(that.language.place[LANGUAGE_DEFINE], project.place);
                 iP.position({
                     y: titleForm.y() + titleForm.height() + 15,
                     x: 15
                 })
-                var iW = createItemInfo("Hạng mục", project.work);
+                var iW = createItemInfo(that.language.work[LANGUAGE_DEFINE], project.work);
                 iW.position({
                     x: 15,
                     y: iP.y() + iP.height() + 5
                 })
-                var iC = createItemInfo("Thể loại công trình", project.category);
+                var iC = createItemInfo(that.language.category[LANGUAGE_DEFINE], project.category);
                 iC.position({
                     x: 15,
                     y: iW.y() + iW.height() + 5
                 })
-                var iY = createItemInfo("Năm hoàn thành", project.category);
+                var iY = createItemInfo(that.language.year[LANGUAGE_DEFINE], project.year);
                 iY.position({
                     x: 15,
                     y: iC.y() + iC.height() + 5
@@ -367,7 +386,7 @@ class View {
                     x: 0,
                     y: 0,
                     width: (formForm.width() - 40)/2,
-                    text: "Xem tiếp >",
+                    text: that.language.next[LANGUAGE_DEFINE],
                     fontSize: 15,
                     fontFamily: 'Montserrat',
                     fontStyle: 'bold',
@@ -396,7 +415,7 @@ class View {
                     x: 0,
                     y: 0,
                     width: (formForm.width() - 40)/2,
-                    text: "< Trở lại",
+                    text: that.language.back[LANGUAGE_DEFINE],
                     fontSize: 15,
                     fontFamily: 'Montserrat',
                     fontStyle: 'bold',
@@ -437,7 +456,7 @@ class View {
         if(width > height){
             that.listProject = new Konva.Group({
                 x: width/4*3,
-                y: 150,
+                y: 50,
             });
             var formList = new Konva.Rect({
                 stroke: '#B14406',
@@ -491,8 +510,19 @@ class View {
         });
 
         list.createItem = function(project, callback){
-            
             var item = new Konva.Group();
+            item.on('click', function(){
+                // Mo / chuyen thong tin
+                that.infoForm.updateData(project);
+                // that.infoForm.show();
+                that.__toggleInfo("info");
+            });
+            item.on('tap', function(){
+                that.infoForm.updateData(project);
+                // that.infoForm.show()
+                that.__toggleInfo("info");
+                that.listProject.hide();
+            })
             var titleItem = new Konva.Text({
                 text: project.title,
                 fontSize: 12,
@@ -500,10 +530,10 @@ class View {
                 padding: 10,
                 align: 'left',
             });
-            var imgItem = new Image();
-            imgItem.onload = function(){
+            if(project.srcImage){
+            //     // Da tai roi
                 var imageItem = new Konva.Image({
-                    image: imgItem,
+                    image: project.srcImage,
                     width: 45,
                     height: 47,
                 });
@@ -540,28 +570,62 @@ class View {
                 item.on("mouseout", function(e){
                     borderItem.fill("#FFFFFF");
                 })
+                project.item = item;
                 if(callback){
                     callback(item);
-                }        
-            }
-            if(project.image){
-                imgItem.src = project.image.publicUrl; //src image
+                } 
             } else {
-                imgItem.src = "/my_image.png"; //src image
+                var imgItem = new Image();
+                imgItem.onload = function(){
+                    project.srcImage = imgItem;
+                    var imageItem = new Konva.Image({
+                        image: project.srcImage,
+                        width: 45,
+                        height: 47,
+                    });
+                    var itemRect = new Konva.Rect({
+                        stroke: '#B14406',
+                        strokeWidth: 2,
+                        cornerRadius: 5,
+                        width: imageItem.width() + 5,
+                        height: imageItem.height() + 5
+                    })
+                    imageItem.position({
+                        x: (itemRect.width() - imageItem.width())/2,
+                        y: (itemRect.height() - imageItem.width())/2
+                    });
+                    titleItem.position({
+                        x: itemRect.width() + 5,
+                        y: (itemRect.height() - titleItem.height())/ 2
+                    });
+                    var borderItem = new Konva.Rect({
+                        height: itemRect.height(),
+                        width: formList.width() - 20,
+                        cornerRadius: 10,
+                    })
+                    item.add(borderItem);
+                    item.add(itemRect);
+                    item.add(imageItem);
+                    item.add(titleItem);
+                    item.h = borderItem.height();
+                    item.height(borderItem.height());
+                    item.width(borderItem.width());     
+                    item.on("mouseover", function(e){
+                        borderItem.fill("#555555");
+                    })
+                    item.on("mouseout", function(e){
+                        borderItem.fill("#FFFFFF");
+                    })
+                    if(callback){
+                        callback(item);
+                    }        
+                }
+                if(project.image){
+                    imgItem.src = project.image.publicUrl; //src image
+                } else {
+                    imgItem.src = "/my_image.png"; //src image
+                }
             }
-
-            item.on('click', function(){
-                // Mo / chuyen thong tin
-                that.infoForm.updateData(project);
-                // that.infoForm.show();
-                that.__toggleInfo("info");
-            });
-            item.on('tap', function(){
-                that.infoForm.updateData(project);
-                // that.infoForm.show()
-                that.__toggleInfo("info");
-                that.listProject.hide();
-            })
         }
 
         that.listProject.createList = function(projects){
@@ -623,9 +687,14 @@ class View {
             that.logo.height(Math.max(imageLogo.height(), textLogo.height()));
             that.logo.position({
                 x: 50,
-                y: that.stage.height() - 100
+                y: that.stage.height() - 50
             });
-            that.layer2.add(that.logo);
+            if(width > height){
+                that.layer2.add(that.logo);
+            } else {
+
+            }
+
         };
         imgLogo.src = "/v14.png";
 
@@ -672,6 +741,9 @@ class View {
             y: 50
         });
         that.layer2.add(that.hello);
+        if(width<height){
+            that.hello.show();
+        }
     }
     _setNewPosition(newPos, callback){
         var that = this;
@@ -799,6 +871,7 @@ class View {
         that.stage.position(newPos);
         that.layer2.x(-newPos.x);
         that.layer2.y(-newPos.y);
+        return newPos;
     }
     _initInteractive(){
         var that = this;
@@ -845,7 +918,7 @@ class View {
                 window.top.postMessage({
                     type: "scroll",
                     scrollY: e.evt.deltaY
-                })
+                }, "*")
                 return;
             }
 
@@ -873,8 +946,6 @@ class View {
             e.evt.preventDefault();
             var touch1 = e.evt.touches[0];
             var touch2 = e.evt.touches[1];
-            // alert(touch2);
-            // alert(touch1);
             if (touch1 && touch2) {
                 // Wheel
                 if (that.stage.isDragging()) {
@@ -889,11 +960,13 @@ class View {
                     x: touch2.clientX,
                     y: touch2.clientY,
                 };
-                // alert("HERE-1");
+
+                // Lay gia tri last center lan dau tien
                 if (!lastCenter) {
                     lastCenter = getCenter(p1, p2);
                     return;
                 }
+
                 // alert("HERE-5");
                 var newCenter = getCenter(p1, p2);
                 // alert("HERE-3");
@@ -902,49 +975,36 @@ class View {
                 if (!lastDist) {
                     lastDist = dist;
                 }
-                
-                var pointTo = {
-                    x: (newCenter.x - that.stage.x()) / that.stage.scaleX(),
-                    y: (newCenter.y - that.stage.y()) / that.stage.scaleX(),
-                };
-                //Scale
-                // alert("HERE-1");
                 var oldScale = that.layer1.scaleX();
-                var newScale;
-                if(dist / lastDist > 1){
-                    newScale = oldScale * 1.005;
-                } else if (dist / lastDist < 1){
-                    newScale = oldScale * 0.995;
-                } else {
-                    newScale = oldScale;
+                var pointTo = {
+                    x: (newCenter.x - that.stage.x())/oldScale,
+                    y: (newCenter.y - that.stage.y())/oldScale
                 }
-                if(newScale < 1){
-                    newScale = 1;
-                }
-                // that._setZoom(newScale, that._getCenterMap(newCenter));
-                that.layer1.scale({ x: newScale, y: newScale });
-            
-                // // Cac thong so khong thay doi khi scale
-                // // Kich thuoc marker
+                
+                var newScale = oldScale * (dist / lastDist); // New Scale
+                that.layer1.scaleX(newScale);
+                that.layer1.scaleY(newScale);
                 that.__notChangeWhenZoom();
                 
                 // calculate new position of the stage
+
                 var dx = newCenter.x - lastCenter.x;
                 var dy = newCenter.y - lastCenter.y;
 
                 var newPos = {
-                    x: newCenter.x - pointTo.x * scale + dx,
-                    y: newCenter.y - pointTo.y * scale + dy,
+                    x: newCenter.x - pointTo.x * newScale + dx,
+                    y: newCenter.y - pointTo.y * newScale + dy,
                 };
-                that._setCenter(that._getCenterMap(addPos(newCenter, {x: dx, y: dy})));
-                // that.stage.position(newPos);
-                // that.layer2.x(-newPos.x);
-                // that.layer2.y(-newPos.y);
-
+                
+                // that.layer1.position(newPos);
+                that.stage.position(newPos);
+                that.layer2.x(-newPos.x);
+                that.layer2.y(-newPos.y);
                 lastDist = dist;
                 lastCenter = newCenter;
 
             } else {
+                // SCROLL DONE
                 var mousePos = {
                     x: touch1.clientX,
                     y: touch1.clientY
@@ -953,17 +1013,11 @@ class View {
                     x: that.stage.x() + (mousePos.x - oldMouse.x),
                     y: that.stage.y() + (mousePos.y - oldMouse.y)
                 }
-                // var maxWidth = that.layer1.width()*that.layer1.scale().x;
-                // var maxHeight = that.layer1.height()*that.layer1.scale().y;
-                
-                // that.stage.position(newPos);
-                // that.layer2.x(-newPos.x);
-                // that.layer2.y(-newPos.y);
                 
                 window.top.postMessage({
                     type: "scroll",
                     scrollY:  - mousePos.y + oldStart.y
-                });
+                }, "*");
                 // console.log(- mousePos.y + oldMouse.y);
                 // oldStart = mousePos;
             }
@@ -995,21 +1049,6 @@ class View {
                     x: that.stage.x() + (mousePos.x - oldMouse.x),
                     y: that.stage.y() + (mousePos.y - oldMouse.y)
                 }
-                var maxWidth = that.layer1.width()*that.layer1.scale().x;
-                var maxHeight = that.layer1.height()*that.layer1.scale().y;
-
-                // if(newPos.x < -(maxWidth - that.stage.width())){
-                //     newPos.x = -(maxWidth - that.stage.width());
-                // }
-                // if(newPos.x > 0){
-                //     newPos.x = 0;
-                // }
-                // if(newPos.y < -(maxHeight - that.stage.height())){
-                //     newPos.y = -(maxHeight - that.stage.height());
-                // }
-                // if(newPos.y > 0){
-                //     newPos.y = 0;
-                // }
 
                 that.stage.position(newPos);
                 that.layer2.x(-newPos.x);
@@ -1039,36 +1078,16 @@ class View {
                 s = 0.2;
                 that.background.scaleX(s);
                 that.background.scaleY(s);
-    
-                var wi = that.background.width()*that.background.scaleX();
-                var hi = that.background.height()*that.background.scaleY();
-                
-                // that.stage.x(-(1/16)*wi);
-                // that.stage.y(-(1/4-1/16)*hi);
-                that._setCenter({x: 4304 - 500, y: 2559});
-                // that.layer2.x((1/16)*wi);
-                // that.layer2.y((1/4-1/16)*hi);
+                that._beginStage = that._setCenter({x: 4304 - 500, y: 2559});
             } else {
                 var s = (1/(7/8-1/2))*w/that.imgBackground.width;
-                console.log(s);
                 that.background.scaleX(s);
                 that.background.scaleY(s);
-    
-                var wi = that.background.width()*that.background.scaleX();
-                var hi = that.background.height()*that.background.scaleY();
-                
-                // that.stage.x(-(1/2 - 1/16)*wi);
-                // that.stage.y(-(1/4-1/8)*hi);   
-
-                // that.layer2.x((1/2 - 1/16)*wi);
-                // that.layer2.y((1/4-1/8)*hi);   
-                that._setCenter({x: 4304 - 500, y: 2559});
+                that._beginStage = that._setCenter({x: 4304 - 500, y: 2559});
             }
         }
 
         // Hide
-        // that.layer2.hide();
-
         this.imgBackground.onload = function(){
             that.background = new Konva.Image({
                 x: 0,
@@ -1142,7 +1161,7 @@ class View {
             width: 30,
             height: 30,
             image: this.imgMarker,
-            draggable: true,
+            // draggable: true,
         });
         mk.data = marker;
         mk.Sw = Sw;
@@ -1169,7 +1188,6 @@ class View {
                     mke.opacity(0.5);
                 }
             });
-            console.log("Here");
         });
 
         mk.on('mouseover', function(){
@@ -1184,9 +1202,6 @@ class View {
         });
 
         // TOUCH PAD
-        // mk.on('tap', function(e){
-        //     that.onHandleMarker(e, this);
-        // })
         that.extendMarker(mk);
         return mk;
     };
@@ -1215,6 +1230,7 @@ class View {
     _getCenterMap(pos){
         var that = this;
         var nowPos = that.stage.position();
+        // console.log(nowPos);
         if(pos){
             nowPos = pos;
         }
@@ -1226,13 +1242,14 @@ class View {
     }
     forcusMarker(marker){
         var that = this;
+        that.infoMarker.hide();
+        that.listProject.hide();
+        that.infoForm.hide();
         if(!this.oldForcusMarker){
             this.oldForcusMarker = {
                 data: that._getCenterMap()
             }
         }
-        that._setZoom(1, this.oldForcusMarker.data, function(){      // Toa do da nang
-            // Opacity
             that.markers.forEach(function(mk){
                 if(mk._id == marker._id){
                     mk.opacity(1);
@@ -1246,7 +1263,6 @@ class View {
                 that.lockBackground = 2;
             });
             that.oldForcusMarker = marker;
-        }); 
 
     }
     normalMarker(){

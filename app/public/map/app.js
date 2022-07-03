@@ -12,10 +12,29 @@ class Model {
         var that = this;
         graphql(QL_FETCH_MARKER).then(data=>{
             that.markers = data.data.allMarkers;
+            if(LANGUAGE_DEFINE == 1){
+                that.markers.forEach(function(marker){
+                    marker.projects.forEach(function(project){
+                        project.title = project.titleTA;
+                        project.place = project.placeTA;
+                        project.category = project.categoryTA;
+                        project.work = project.workTA;
+                    });
+                    marker.name = marker.nameTA;
+                });
+            }
             that._commit();
         });
         graphql(QL_FETCH_PROJECT).then(data=>{
             that.projects = data.data.allProjects;
+            if(LANGUAGE_DEFINE == 1){
+                that.projects.forEach(function(project){
+                    project.title = project.titleTA;
+                    project.place = project.placeTA;
+                    project.category = project.categoryTA;
+                    project.work = project.workTA;
+                });
+            }
             that._commit();
         });
     }
@@ -52,9 +71,7 @@ class Controller {
     }
 
     onHandleMarker = (e, marker) => {
-        // this.view.showInfo(marker.data.projects); 
         this.view.forcusMarker(marker);   
-        // console.log(1);    
     }
 
     onHandleBackground = () => {
@@ -63,11 +80,3 @@ class Controller {
 }
 
 const app = new Controller(new Model(), new View("canvas", width, height));
-
-// // Connect with parent
-// $(document).ready(function(){
-//     window.top.postMessage({
-//         a: "1",
-//         b: "Hello World 2"
-//     }, "*");
-// })

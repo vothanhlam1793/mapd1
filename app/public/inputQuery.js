@@ -5,6 +5,7 @@ query ($id: ID!){
     x
     y
     name
+    nameTA
     note
   }
 }
@@ -17,6 +18,7 @@ query ($id: ID!){
         marker {
             id
             name
+            nameTA
             x
             y
         }
@@ -25,6 +27,10 @@ query ($id: ID!){
         place
         category
         work
+        titleTA
+        placeTA
+        categoryTA
+        workTA
         year
         url
     }
@@ -38,6 +44,7 @@ query {
       x 
       y
       name
+      nameTA
       note
       id
       projects {
@@ -46,6 +53,10 @@ query {
         content
         place
         category
+        titleTA
+        placeTA
+        categoryTA
+        workTA
         work
         year
         url
@@ -55,6 +66,7 @@ query {
         marker {
           id
           name
+          nameTA
           x
           y
         }
@@ -70,6 +82,7 @@ query {
         marker {
             id
             name
+            nameTA
             x
             y
         }
@@ -77,6 +90,10 @@ query {
         content
         place
         category
+        titleTA
+        placeTA
+        categoryTA
+        workTA
         work
         year
         url

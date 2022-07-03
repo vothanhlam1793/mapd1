@@ -25,7 +25,8 @@ const {
         isRequired: true
       },
       title: {
-        type: Text
+        type: Text, 
+        label: "Tên dự án"
       },
       place: {
         type: Text,
@@ -53,6 +54,22 @@ const {
             }
           },
         },  
+      },
+      titleTA: {
+        type: Text, 
+        label: "Name project"
+      },
+      placeTA: {
+        type: Text,
+        label: "Place project"
+      },
+      categoryTA: {
+        type: Text,
+        label: "Category project"
+      },
+      workTA: {
+        type: Text,
+        label: "Work Project"
       },
       url: {
         type: Text

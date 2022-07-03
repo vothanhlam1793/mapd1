@@ -15,7 +15,14 @@ function middle(keystone, dev, distDir){
 
   // TOOL
   app.get("/", (req, res)=>{
-      res.render("index");
+    if(req.query.language){
+      var lang = req.query.language;
+    } else {
+      var lang = 0;
+    }
+    res.render("index", {
+        language: lang
+      });
   });
 
   // Trang nhap lieu

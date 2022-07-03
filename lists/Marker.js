@@ -21,6 +21,10 @@ const {
       name: {
         type: Text
       },
+      nameTA: {
+        type: Text,
+        label: "Tên tiếng anh"
+      },
       note: {
         type: Text
       },
