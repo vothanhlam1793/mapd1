@@ -98,6 +98,94 @@ class View {
         this._initLayer3();
         this.onHandleMarker = function(){};
     }
+    _initHello(hellos){
+        var that = this;
+        // LOGO
+        that.logo = new Konva.Group();
+        var textLogo = new Konva.Text({
+            fill: "#B14406",
+            text: "OUR PORTFOLIO",
+            fontSize: 28,
+            fontStyle: '800',
+            fontFamily: 'Montserrat',
+            align: 'left',
+        });
+        var imgLogo = new Image();
+        imgLogo.onload = function(){
+            var imageLogo = new Konva.Image({
+                image: imgLogo,
+                height: textLogo.height(), 
+                scaleX: textLogo.height() / imgLogo.height
+            });
+            imageLogo.position({
+                x: textLogo.width() + 10,
+                y: (textLogo.height() - imageLogo.height())/2
+            })
+            
+            that.logo.add(textLogo);
+            that.logo.add(imageLogo);
+            that.logo.width(imageLogo.x() + imageLogo.width());
+            that.logo.height(Math.max(imageLogo.height(), textLogo.height()));
+            that.logo.position({
+                x: 50,
+                y: that.stage.height() - 50
+            });
+            if(width > height){
+                // that.layer2.add(that.logo);
+            } else {
+
+            }
+
+        };
+        imgLogo.src = "/v14.png";
+
+        // HELLO
+        that.hello = new Konva.Group();
+        if(width>height){
+            that.hello.width(300);
+        }
+        var t1Hello = new Konva.Text({
+            text: hellos[0].title1,
+            width: that.hello.width(),
+            fontSize: 28,
+            fontStyle: '700',
+            fontFamily: 'Montserrat',
+            align: 'left',
+        });
+        var t2Hello = new Konva.Text({
+            text: hellos[0].title2,
+            width: that.hello.width(),
+            fontSize: 28,
+            fontStyle: '700',
+            fontFamily: 'Montserrat',
+            align: 'right',
+        });
+        var cHello = new Konva.Text({
+            text: hellos[0].descript,
+            width: that.hello.width(),
+            fontSize: 12,
+            fontStyle: '400',
+            fontFamily: 'Montserrat',
+            align: 'left',
+        });
+        t2Hello.position({
+            y: t1Hello.height()
+        });
+        cHello.position({
+            y: t2Hello.y() + t2Hello.height() + 30
+        });
+        that.hello.add(t1Hello);
+        that.hello.add(t2Hello);
+        that.hello.add(cHello);
+        that.hello.position({
+            x: 50,
+            y: 50
+        });
+        that.layer2.add(that.hello);
+        if(width<height){
+            that.hello.show();
+        }
+    }
     _initLayer3(){
         var that = this;
         this.notifyLayer = new Konva.Rect({
@@ -590,6 +678,7 @@ class View {
                     width: imageItem.width() + 5,
                     height: imageItem.height() + 5
                 })
+                titleItem.width(formList.width() - itemRect.width() - 5)
                 imageItem.position({
                     x: (itemRect.width() - imageItem.width())/2,
                     y: (itemRect.height() - imageItem.width())/2
@@ -673,12 +762,11 @@ class View {
                 }
             }
         }
-
+        var controlPage = new Konva.Group();
         that.listProject.createList = function(projects){
             if(projects){
                 that.projects = projects;
             }
-
             titleList.text("Dự án " + that.projects[0].marker.name);
 
             var lists  = that.listProject.find('.list');
@@ -690,106 +778,129 @@ class View {
             }
 
             // Tao cai moi
+            var page = 0;
+            var soluong = 0;
+            var fullPage = formList.height() - 30;
             for(var i = 0; i < that.projects.length; i++){
                 lists[0].createItem(projects[i], function(item){
                     var j = lists[0].children.length;
-                    item.y(j * item.h + 12*j);
+                    if(soluong == 0){
+                        soluong = parseInt(Math.floor((fullPage/(item.h + 12))));
+                    };
+                    item.page = Math.floor(j/soluong) + 1;
+                    item.y((j%soluong) * (item.h + 12));
+                    if(item.page > 1){
+                        item.hide();
+                    }
                     lists[0].add(item);
+                    controlPage.max = item.page;
+                    // alert(item.page);
+                    controlPage.showPage();
                 });
             }
             that.listProject.show();
+            controlPage.pageNow = 1;
+            controlPage.min = 1;
             that.lockBackground = 1;
         }
+        that.listProject.showPage = function(page){
+            // that.listProject.pageNow
+        }
+
+        var nextButton = new Konva.Text({
+            text: ">",
+            width: formList.width()/3,
+            x: formList.width()*2/3,
+            align: "center",
+            fontSize: 18,
+            fontFamily: 'Montserrat',
+            fill: '#B14406',
+            fontStyle: "800"
+        });
+        var prevButton = new Konva.Text({
+            text: "<",
+            width: formList.width()/3,
+            x: 0,
+            fontSize: 18,
+            fontFamily: 'Montserrat',
+            fill: '#B14406',
+            fontStyle: "800",
+            align: "center"
+        })
+        var showPage = new Konva.Text({
+            text: "1",
+            width: formList.width()/3,
+            x: formList.width()/3,
+            align: "center",
+            fontSize: 18,
+            fontFamily: 'Montserrat',
+            fill: '#B14406',
+            fontStyle: "800"
+        });
+        controlPage.showPage = function(page, min, max){
+            showPage.text(this.pageNow);
+            if(this.pageNow == this.min){
+                prevButton.opacity(0.2);
+            } else if (this.pageNow > this.min){
+                prevButton.opacity(1);
+            }
+            if(this.pageNow == this.max){
+                nextButton.opacity(0.2);
+            } else if (this.pageNow < this.max){
+                nextButton.opacity(1);
+            }
+        }
+        controlPage.init = function(page, min, max){
+            controlPage.pageNow = page;
+            controlPage.min = min;
+            controlPage.max = max;
+        }
+        nextButton.on("click tap", function(){
+            if(controlPage.pageNow == controlPage.max){
+                return;
+            }
+            controlPage.pageNow += 1;
+            var lists  = that.listProject.find('.list');
+            lists[0].children.forEach(function(item){
+                if(item.page == controlPage.pageNow){
+                    item.show();
+                } else {
+                    item.hide();
+                }
+            })
+            controlPage.showPage();
+        });
+        prevButton.on("click tap",  function(){
+            if(controlPage.pageNow == controlPage.min){
+                return;
+            }
+            controlPage.pageNow -= 1;
+            var lists  = that.listProject.find('.list');
+            lists[0].children.forEach(function(item){
+                if(item.page == controlPage.pageNow){
+                    item.show();
+                } else {
+                    item.hide();
+                }
+            })
+            controlPage.showPage();
+        });
+        controlPage.add(nextButton);
+        controlPage.add(prevButton);
+        controlPage.add(showPage);
+        controlPage.width(formList.width());
+        controlPage.height(showPage.height());
+        controlPage.position({
+            x: 0,
+            y: formList.height() - controlPage.height() - 10
+        });
+        that.listProject.add(controlPage);
+
         that.listProject.add(list);
 
         that.listProject.hide();
         that.layer2.add(that.listProject);
 
-        // LOGO
-        that.logo = new Konva.Group();
-        var textLogo = new Konva.Text({
-            fill: "#B14406",
-            text: "OUR PORTFOLIO",
-            fontSize: 28,
-            fontStyle: '800',
-            fontFamily: 'Montserrat',
-            align: 'left',
-        });
-        var imgLogo = new Image();
-        imgLogo.onload = function(){
-            var imageLogo = new Konva.Image({
-                image: imgLogo,
-                height: textLogo.height(), 
-                scaleX: textLogo.height() / imgLogo.height
-            });
-            imageLogo.position({
-                x: textLogo.width() + 10,
-                y: (textLogo.height() - imageLogo.height())/2
-            })
-            
-            that.logo.add(textLogo);
-            that.logo.add(imageLogo);
-            that.logo.width(imageLogo.x() + imageLogo.width());
-            that.logo.height(Math.max(imageLogo.height(), textLogo.height()));
-            that.logo.position({
-                x: 50,
-                y: that.stage.height() - 50
-            });
-            if(width > height){
-                that.layer2.add(that.logo);
-            } else {
-
-            }
-
-        };
-        imgLogo.src = "/v14.png";
-
-        // HELLO
-        that.hello = new Konva.Group();
-        if(width>height){
-            that.hello.width(300);
-        }
-        var t1Hello = new Konva.Text({
-            text: "YOUR DREAM",
-            width: that.hello.width(),
-            fontSize: 28,
-            fontStyle: '700',
-            fontFamily: 'Montserrat',
-            align: 'left',
-        });
-        var t2Hello = new Konva.Text({
-            text: "WE BUILD",
-            width: that.hello.width(),
-            fontSize: 28,
-            fontStyle: '700',
-            fontFamily: 'Montserrat',
-            align: 'right',
-        });
-        var cHello = new Konva.Text({
-            text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Faucibus ut sapien vel quis vel dui. Sed libero cras urna nisl ut ut feugiat. Et ut duis duis lorem et mauris. Eget aliquam aliquet varius et sollicitudin. Fringilla dignissim aenean massa, aliquet neque, neque dis rhoncus, nulla. ",
-            width: that.hello.width(),
-            fontSize: 12,
-            fontStyle: '400',
-            fontFamily: 'Montserrat',
-            align: 'left',
-        });
-        t2Hello.position({
-            y: t1Hello.height()
-        });
-        cHello.position({
-            y: t2Hello.y() + t2Hello.height() + 30
-        });
-        that.hello.add(t1Hello);
-        that.hello.add(t2Hello);
-        that.hello.add(cHello);
-        that.hello.position({
-            x: 50,
-            y: 50
-        });
-        that.layer2.add(that.hello);
-        if(width<height){
-            that.hello.show();
-        }
     }
     _setNewPosition(newPos, callback){
         var that = this;

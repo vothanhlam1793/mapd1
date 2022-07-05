@@ -74,7 +74,17 @@ query {
     }
 }
 `
-
+const QL_FETCH_HELLO = `
+  query {
+    allHellos {
+      id
+      descript
+      descriptTA
+      title1 title1TA
+      title2 title2TA
+    }
+  }
+`
 const QL_FETCH_PROJECT = `
 query {
     allProjects {

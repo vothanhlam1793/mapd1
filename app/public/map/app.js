@@ -37,12 +37,26 @@ class Model {
             }
             that._commit();
         });
+        graphql(QL_FETCH_HELLO).then(data=>{
+            that.hellos = data.data.allHellos;
+            if(LANGUAGE_DEFINE == 1){
+                that.hellos.forEach(function(hello){
+                    hello.descript = hello.descriptTA;
+                    hello.title1 = hello.title1TA;
+                    hello.title2 = hello.title2TA;
+                });
+            }
+            that.updateHello();
+        });
     }
     _commit(){
         this.onChangeData({markers: this.markers, projects: this.projects})
     }
     bindChangedData(callback){
         this.onChangeData = callback;
+    }
+    bindUpdateHello(callback){
+        this.updateHello = callback;
     }
     getProjectsByMarker(markerId){
         var projects = this.projects.filter(function(project){
@@ -62,8 +76,12 @@ class Controller {
         this.model = model;
         this.view = view;
         this.model.bindChangedData(this.updateData);
+        this.model.bindUpdateHello(this.updateHello);
         this.view.onHandleMarker = this.onHandleMarker;
         this.view.onLoadBackground = this.onHandleBackground;
+    }
+    updateHello = ()=>{
+        this.view._initHello(this.model.hellos);
     }
     updateData = (data) => {
         // Xoa va ve lai marker
