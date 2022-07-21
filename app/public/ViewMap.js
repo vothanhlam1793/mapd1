@@ -64,7 +64,8 @@ class View {
             work: ['Hạng mục','Work'],
             year: ['Năm hoàn thành','Year'],
             next: ["Xem tiếp >", "Detail >"],
-            back: ["< Trở lại", "< Back"]
+            back: ["< Trở lại", "< Back"],
+            location: ["Chọn địa điểm","Select location"]
         }
         this.stage.getContainer().style.backgroundColor = 'rgba(237,237,237,255)';
         this.layer1 = new Konva.Layer({
@@ -738,6 +739,7 @@ class View {
                         width: formList.width() - 20,
                         cornerRadius: 10,
                     })
+                    titleItem.width(formList.width() - itemRect.width() - 5)
                     item.add(borderItem);
                     item.add(itemRect);
                     item.add(imageItem);
@@ -972,18 +974,23 @@ class View {
         var newScale = that.layer1.scaleX();
         // Cac thong so khong thay doi khi scale
         // Kich thuoc marker
-        that.markers.forEach(function(marker){
-            marker.scale({
+        if(width > height){
+            that.markers.forEach(function(marker){
+                marker.scale({
+                    x: 1/newScale,
+                    y: 1/newScale
+                })
+                marker.center(1/newScale);
+            })
+        }
+
+        // Kich thuoc info marker
+        // if(width > height) {
+            that.infoMarker.scale({
                 x: 1/newScale,
                 y: 1/newScale
-            })
-            marker.center(1/newScale);
-        })
-        // Kich thuoc info marker
-        that.infoMarker.scale({
-            x: 1/newScale,
-            y: 1/newScale
-        });
+            });
+        // }
 
         // Khoang cach info marker
         that.infoMarker.adjustIndex();
@@ -1179,7 +1186,7 @@ class View {
                     type: "scroll",
                     scrollY:  - mousePos.y + oldStart.y
                 }, "*");
-                that.layer3.showNotify();
+                // that.layer3.showNotify();
                 // console.log(- mousePos.y + oldMouse.y);
                 // oldStart = mousePos;
             }
@@ -1277,7 +1284,7 @@ class View {
             marker.destroy();
         });
         this.markers = [];
-        that.selectMarker = new SelectView("Chọn địa điểm");
+        that.selectMarker = new SelectView(that.language.location[LANGUAGE_DEFINE]);
         // Ve lai marker
         markers.forEach(function(marker){
             if(all){
@@ -1307,13 +1314,17 @@ class View {
             })
         }
         setTimeout( function(){
-            that.selectMarker.formSelect.children[1].text("Chọn vị trí");
+            that.selectMarker.formSelect.children[1].text(that.language.location[LANGUAGE_DEFINE]);
         }, 2000)
         that.selectMarker.showUp();
         that.layer2.add(that.selectMarker.formSelect);
         
     }
     getMarker(marker){
+        var whmk = 30;
+        if(height > width){
+            whmk = 15;
+        }
         var that = this;
 
         // Chuyen doi toa do
@@ -1324,11 +1335,12 @@ class View {
         var mk = new Konva.Image({
             x: marker.x*Sw,
             y: marker.y*Sy,
-            width: 30,
-            height: 30,
+            width: whmk,
+            height: whmk,
             image: this.imgMarker,
             // draggable: true,
         });
+
         mk.data = marker;
         mk.Sw = Sw;
         mk.Sy = Sy;
